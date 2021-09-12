@@ -48,6 +48,8 @@ Before you get started, make sure you replace "file_name_here_1.csv" with the na
 bias_data <- read_csv("data/bias_data.csv")
 ```
 
+\newpage
+
 ## Question 1
 First, let's look at the rare disease problem. You'll recall from the Kahneman (2003) piece that responses to this problem often differ based on the framing (people being saved versus people dying), despite the fact that the two frames are logically equivalent. This is what is called a 'framing bias'.
 
@@ -79,6 +81,7 @@ prop_test(bias_data, rare_disease_prog ~ rare_disease_cond,
 
 From the table, we can see that a higher proportion of respondents chose Program A under the save condition. This reflects the same pattern that Kahneman described in Prospect Theory that people tend to be more loss adverse. The 95% confidence interval supports this theory further because it tells us that at a 95% confidence level, we can say that the difference in proportion between participants who choose Program A under the "save" and "die" conditions is between 0.543 and 0.093.
 
+\newpage
 
 ## Question 2
 Now let's move on to the Linda problem. As we read in Kahneman (2003), answers to this problem tend to exhibit a pattern called a "conjunction fallacy" whereby respondents overrate the probability that Linda is a bank teller \textit{and} a feminist rather than just a bank teller. From probability theory, we know that the conjunction of two events A and B can't be more probable than either of the events occurring by itself; that is, $P(A) \ge P(A \wedge B)$ and $P(B) \ge P(A \wedge B)$\footnote{The symbol $\wedge$ is used in logical expressions to mean "AND". If there are two conditions, A and B, then $A \wedge B$ is true only when both A and B are separately true. The expression $P(A) \ge P(A \wedge B)$ is therefore interpreted as: "The probability A is true is greater than or equal to the probability that both A and B are true.}.
@@ -99,6 +102,8 @@ bias_data %>%
 ```
 
 A fairly high proportion of students in the class, around 70%, answered the Linda problem correctly. I think most people tend to choose the wrong option because they use the representativeness heuristic to make a quick judgment. Becuase Linda appears to be more representative of a feminist, people are naturally drawn to connect her as a feminist even though it is statistically not as likely as Linda being just a bank teller.
+
+\newpage
 
 ## Question 3
 
@@ -123,6 +128,8 @@ bias_data %>%
 ```
 
 I hypothesized that students who have a stats background are less likely to be fooled by the Linda problem. The data provides initial support for my hypothesis in that a higher proportion of students with a stats background correctly chose "teller" compared to studnets without a stats background.
+
+\newpage
 
 ## Question 4: Data Science Question
 Now we will take a look at the taxi cab problem. This problem, originally posed by Tversky and Kahneman in 1977, is intended to demonstrate what they call a "base rate fallacy". To refresh your memory, here is the text of the problem, as you saw it on the survey last week:
@@ -178,6 +185,8 @@ print(most_commomn_guess)
 
 In the cab problem, we can see that the correct answer is about 41.4% that the cab was actually blue based on the witness's testimony. However, the most common response among the students was 80%.
 
+\newpage
+
 # Part 2: Political Faces
 
 Now you will investigate some of the data used in Atkinson et al. (2009). These data cover Senate candidates from 1992-2006 and include face ratings, partisanship, incumbent status, and other variables. 
@@ -210,9 +219,17 @@ As an example of how you might write your own code to analyze these data, let's 
 
 ```{r}
 # make density plot of perceived competence by party
-ggplot(data = face_data, aes(x = face_rating, color = party)) + # note that by setting color = party, 
-  geom_density()                                                # the face ratings of each party will be 
-                                                                # displayed in different colors
+feature_img <- ggplot(data = face_data, aes(x = face_rating, color = party)) + # note that by setting color = party, 
+  geom_density() +                                              # the face ratings of each party will be 
+  theme_light() +                                               # displayed in different colors
+  labs(title = "Perceived Competence by Party",
+       x = "Face Rating",
+       y = "Density",
+       color = "Party")
+
+# png("cognition.png", units="in", width=8, height=5, res=300)
+# print(feature_img)
+# dev.off()
 ```
 
 We can also consider this statistically using a t-test for whether or not the mean face ratings are significantly different across parties.
@@ -223,6 +240,8 @@ difference_in_means(face_rating ~ party, data = face_data)
 ```
 
 Neither the graphical nor the statistical approaches suggest a significant difference in perceived competence of candidate faces by party.
+
+\newpage
 
 ## Question 5
 **Do the data suggest a significant difference between perceived competence of incumbent vs. non-incumbent candidate faces? How do your findings relate to the results and theory of Atkinson et al. (2009)?**
@@ -246,6 +265,8 @@ difference_in_means(face_rating ~ incumbent, data = face_data)
 ```
 
 From the t-test, we can say that at a 95% confidence level, the difference between perceived competence of incumbent vs. non-incumbent is between an interval of 0.269 and 0.626. In other words, incumbents tend to be perceived as being more competent. This supports the results and theory of Atkinson et al. (2009) that physical appearance matters in how people percieve politicians.
+
+\newpage
 
 ## Question 6
 **Do the data suggest a significant difference between perceived competence of non-incumbent candidate faces in tossup vs. non-tossup races? What might explain any similarities or differences between these results and those from the previous question? How do your findings relate to the results and theory of Atkinson et al. (2009)?**
@@ -274,18 +295,47 @@ difference_in_means(face_rating ~ tossup, data = face_data_non_incumbents)
 
 When evaluating the perceived competence of non-incumbent candidate faces in tossup vs. non-tossup races, there is not a statistically significant difference. However, in the summary statistics, we can see that the perceived competence of non-incumbent candidate faces in tossup races on average is still higher than the perceived competence of non-incumbent candidate faces in non-tossup races. This still supports the results and theory of Atkinson et al. (2009) in that physical appearance may still be one factor when deciding which candidates run in closer races.
 
+\newpage
+
 ## Question 7: Data Science Question
 Atkinson et al. (2009, 236) suggest that "...incumbents from the most competitive districts would have higher facial quality than incumbents from the most safe incumbent districts due to the selection process of better faces to competitive districts, inducing a negative relationship between incumbent face and incumbent vote." **Do the data support the idea that seat safety is negatively correlated with incumbent facial quality? Make a plot to visualize this relationship.** Note that this question may require you to define at least one new variable.
 
 ```{r Question 7}
-face_data %>% 
+# Plotting face_rating vs competitive among incumbents
+# I'm defining competitiveness using four categories based on the Cook rankings:
+# 0: Solid
+# 1: Likely
+# 2: Lean
+# 3: Tossup
+seat_safety <- face_data %>% 
   filter(incumbent) %>% 
-  ggplot(aes(x = tossup, y = face_rating)) +
-  geom_boxplot(color = "#00bfc4") +
+  mutate(competitive = case_when(
+    str_detect(cook, "Solid") ~ 0,
+    str_detect(cook, "Likely") ~ 1,
+    str_detect(cook, "Lean") ~ 2,
+    str_detect(cook, "Toss") ~ 3,
+    TRUE ~ NA_real_
+  )) %>% 
+  ggplot(aes(x = competitive, y = face_rating)) +
   geom_jitter(width = 0.25, color = "#00bfc4") +
-  geom_smooth(formula = "y ~ x", method = "lm")
+  geom_smooth(formula = y ~ x, method = "lm") +
+  scale_x_continuous(breaks = c(0, 1, 2, 3), labels = c("Solid", "Likely", "Lean", "Tossup")) +
+  theme_light() +
+  labs(
+    title = "Face Rating scores vs race competitiveness among incumbents",
+    x = "",
+    y = "Face Rating"
+  )
+
+# png("seat_safety.png", units="in", width=8, height=5, res=300)
+# print(seat_safety)
+# dev.off()
 ```
 
+Under my definition of competitiveness based on the Cook rankings for races, I do not find evidence to support the idea that seat safety is negatively correlated with incumbent facial quality. From my plot, it can be seen that the face rating scores remain relatively steady across all types of competitiveness among incumbents.
+
+\newpage
 
 ## Question 8
 **Is there something else interesting or informative that you could explore using either of these datasets? If so, run it by a TF and try it out here.**
+
