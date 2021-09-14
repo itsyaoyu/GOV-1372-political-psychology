@@ -227,6 +227,8 @@ feature_img <- ggplot(data = face_data, aes(x = face_rating, color = party)) + #
        y = "Density",
        color = "Party")
 
+feature_img
+
 # png("cognition.png", units="in", width=8, height=5, res=300)
 # print(feature_img)
 # dev.off()
@@ -326,6 +328,8 @@ seat_safety <- face_data %>%
     x = "",
     y = "Face Rating"
   )
+
+seat_safety
 
 # png("seat_safety.png", units="in", width=8, height=5, res=300)
 # print(seat_safety)
