@@ -1,0 +1,42 @@
+---
+title: "Prisoner's Dilemma Strategies"
+author: ""
+date: ""
+output:
+  html_document:
+    css: custom.css
+    fig_caption: true
+    fig_width: 9
+    fig_height: 6
+    number_sections: true
+    theme: cosmo
+    toc: false
+---
+
+--- 
+
+
+```{r, 'setup', echo=FALSE}
+library(axelRod)
+
+strats <- defaultStrategies()
+
+fn <- function(x) {
+  title <- paste0("# ", x$name, "\n")
+  
+  tmp <- strsplit(x$description, "\n")
+  description_title <- paste0("**", tmp[[1]][1], "**\n\n")
+  description_rules <- paste0(tmp[[1]][2:length(tmp[[1]])], "\n")
+  
+  cat(title, description_title, description_rules, "\n---\n\n")
+}
+```
+
+
+```{r, results='asis', echo=FALSE}
+for (i in 1:length(strats)) {
+  fn(strats[[i]])
+}
+```
+
+

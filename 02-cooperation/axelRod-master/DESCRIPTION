@@ -1,0 +1,18 @@
+Package: axelRod
+Type: Package
+Title: Axelrod Tournament
+Version: 0.1.0
+Author: Simon Garnier
+Maintainer: Simon Garnier <garnier@njit.edu>
+Description: This package makes it easy to implement an Axelrod-like tournament
+  for comparing strategies for solving the Prisoner's Dilemna.
+License: GPL-3
+LazyData: TRUE
+Imports:
+  R6,
+  progress,
+  shiny,
+  dplyr,
+  ggvis,
+  roxygen2
+RoxygenNote: 5.0.1

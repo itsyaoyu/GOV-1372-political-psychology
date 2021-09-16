@@ -1,0 +1,16 @@
+player1,player2,score1,score2
+titfortat,handshaker,101,106
+titfortat,winStayer,201,201
+titfortat,inverser,300,300
+titfortat,cycler,273,278
+titfortat,thuemorser,233,233
+handshaker,winStayer,7,492
+handshaker,inverser,498,3
+handshaker,cycler,398,28
+handshaker,thuemorser,299,54
+winStayer,inverser,498,3
+winStayer,cycler,350,100
+winStayer,thuemorser,249,169
+inverser,cycler,298,195
+inverser,thuemorser,186,298
+cycler,thuemorser,188,313
