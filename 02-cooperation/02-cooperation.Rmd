@@ -199,7 +199,7 @@ score_winStayer_plot
 
 ```
 
-From this plot, we see that winStayer actually did best against inverser and handshaker. This makes as inverser doesn't have an absolute retaliation strategy and handshaker defected forever once it realized that winStayer was cooperating. It did worst against thuemorser and titfortat. This also makes sense because thuemorser is based on an almost random sequence and titfortat has a very similar strategy to winStayer (so they probably went back and forth switching moves against each other).
+From this plot, we see that winStayer actually did best against inverser and handshaker. This makes sense as inverser doesn't have an absolute retaliation strategy and handshaker defected forever once it realized that winStayer was cooperating. It did worst against thuemorser and titfortat. This also makes sense because thuemorser is based on an almost random sequence and titfortat has a very similar strategy to winStayer (so they probably went back and forth switching moves against each other).
 
 ## Question 3: Data Science Question
 
@@ -226,7 +226,7 @@ score_all_plot
 
 ```
 
-Looking at the outcomes for all six strategies, we can first see that winStayer actually tied with titfortat, which makes sense given how similar their strategies are to one another. We can also see that when titfortat did lose, it lost only by a very small margin. In the other times it tied, so can say that titfortat is defiantly the most consistent strategy, which is why it is the best when competing against more strategies. winStayer, on the other hand, won with much higher margins most of the time against the other strategies other than titfortat (tied). We can also see that handshaker, the only strategy here without forgiveness, did the worst against titfortat and winStayer, the two strategies that act based on the move of the opponent and have forgiveness.
+Looking at the outcomes for all six strategies, we can first see that winStayer actually tied with titfortat, which makes sense given how similar their strategies are to one another. We can also see that when titfortat did lose, it lost only by a very small margin. In the other times it tied, so we can say that titfortat is definitely the most consistent strategy, which is why it is the best when competing against more strategies. winStayer, on the other hand, won with much higher margins most of the time against the other strategies other than titfortat (tied). We can also see that handshaker, the only strategy here without forgiveness, did the worst against titfortat and winStayer, the two strategies that act based on the move of the opponent and have forgiveness.
 
 ## Question 4
 
