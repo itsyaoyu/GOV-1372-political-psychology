@@ -23,6 +23,7 @@ library(tools) # needed for shiny app
 library(readr) # read_csv()
 library(dplyr) # dplyr()
 library(ggplot2) # ggplot()
+library(gt)
 
 # source helper files for the prisoner's dilemma app
 source("./axelRod-master/R/shiny_tournament.R")
@@ -71,7 +72,7 @@ P.P.S., when you close the app window, there may be some warnings or errors (lik
 
 ```{r, include = F, message = F}
 
-shiny_tournament()
+# shiny_tournament()
 
 ```
 
@@ -99,7 +100,12 @@ Of course, don't just copy these numbers, since they're made up.
 Now you can finally read the data you created into R using the following code and start answering the questions that follow.
 ```{r}
 
-pd_data <- read_csv("data/prisoners_dilemma_data.csv") %>% 
+pd_data <- read_csv("data/prisoners_dilemma_data.csv",
+                    col_types = cols(player1 = col_character(),
+                                     player2 = col_character(),
+                                     score1 = col_double(),
+                                     score2 = col_double()
+                                     )) %>% 
   mutate(winner = case_when( # if you are interested, case_when() is a very useful
     score1 > score2 ~ player1, # function to create new variables. check out how it
     score1 < score2 ~ player2, # works by googling.
@@ -116,6 +122,8 @@ The following code makes a data frame called `player_data_long` that you can use
 
 If you want, try to figure out what each line of code does. Cleaning the data and rearranging it like this is an important part of data science, not just running regressions and taking means. This is why we are leaving some of it to you, via `group_by()` and `summarize()`.
 
+To rank the strategies based on the number of wins, think about making use of the `winner` variable in the `pda_data` data frame.
+
 ```{r Question 1}
 
 player1_data <- pd_data %>% select(player = player1, score = score1, opponent = player2)
@@ -126,7 +134,14 @@ player_data_long <- bind_rows(player1_data, player2_data)
 # I do not count a tie as a win (all ties include titfortat)
 pd_data %>% 
   count(winner) %>% 
-  arrange(desc(n))
+  arrange(desc(n)) %>% 
+  filter(winner != "tie") %>% 
+  gt() %>% 
+  tab_header(title = "Best Strategy Based on Wins") %>% 
+  cols_label(
+    winner = "Strategy",
+    n = "Wins"
+  )
 
 # Best strategy based on number of points
 player_data_long %>% 
@@ -137,10 +152,26 @@ player_data_long %>%
             max_score = max(score),
             total_score = sum(score),
             .groups = "drop") %>% 
-  arrange(desc(avg_score))
+  arrange(desc(avg_score)) %>% 
+  gt() %>% 
+  tab_header(title = "Best Strategy Based on Points") %>% 
+  cols_label(
+    player = "Strategy",
+    min_score = "Lowest Score",
+    med_score = "Median Score",
+    avg_score = "Mean Score",
+    max_score = "Highest Score",
+    total_score = "Total Score"
+  )
 ```
 
-To rank the strategies based on the number of wins, think about making use of the `winner` variable in the `pda_data` data frame.
+Based on the total number of wins (not including ties), the handshaker and winStayer strategies tied for first with 4 wins each. cycler and inverser both came in last with only 1 win each. Notice that titfortat didn't even place in this challenge - it only had ties and losses. However, when we look at the total number of points, we can see that titfortat actually ranks third with winStayer coming out way ahead of handshaker in total score. cycler and inverser are actually very close to each other with only a one score difference in total.
+
+These ranking make a lot of sense, following the methods and reasoning in Axelrod (2006). First, most of these strategies implement some level of kindness, as in cooperating to start with. The only outlier would be thuemorser, which follows the Thue-Morse sequence in a seemingly random sequence. The top three strategies: winStayer, handshaker, and titfortat all have some type of retaliation strategy. inverser also has a retaliation strategy, but it is based on a probability of how much its opponent defects so it is not a always a certain retaliation. When it comes to forgiveness, I think this is what sets winStayer apart from handshaker: winStayer has a forgiveness method, but handshaker does not. The top three strategies are also great in terms of clarity in that they do not try to sneak in any defects. They only do when the other oppondent does first, or in terms of handshaker just defects or cooperates forever.
+
+I think that the reason titfortat didn't do as well in this round is the fewer number of other strategies that it encountered. If there were more of a variety of strategies, especially more unforgiving strategies, some of the others would not do as well as titfortat. The overall winner, winStayer is also very similar to titfortat in that it also reacts to what its opponent does first.
+
+\newpage
 
 ## Question 2
 
@@ -151,17 +182,18 @@ To rank the strategies based on the number of wins, think about making use of th
 ```{r Question 2}
 
 player_data_long %>% 
-  filter(player == "handshaker") %>% 
+  filter(player == "winStayer") %>% 
   ggplot(aes(x = opponent, y = score, label = score)) +
   geom_col(fill = "#00bfc4") +
   geom_text(size = 3, position = position_stack(vjust = 0.5)) +
   theme_light() +
-  labs(title = "handshaker Scores Against Opponents",
+  labs(title = "winStayer Scores Against Opponents",
        x = "Opponent",
        y = "Score")
 
 ```
 
+From this plot, we see that winStayer actually did best against inverser and handshaker. This makes as inverser doesn't have an absoluate retaliation strategy and handshaker defected forever once it realized that winStayer was cooperating. It did worst against thuemorser and titfortat. This also makes sense because thuemorser is based on an almost random sequence and titfortat has a very similar strategy to winStayer (so they probably went back and forth switching moves against each other).
 
 ## Question 3: Data Science Question
 
@@ -169,10 +201,10 @@ player_data_long %>%
 
 ```{r Question 3}
 
-player_data_long %>% 
+score_all_plot <- player_data_long %>% 
   ggplot(aes(x = opponent, y = score, label = score)) +
   geom_col(fill = "#00bfc4") +
-  facet_wrap(~player, scales = "free") +
+  facet_wrap(~player, scales = "free_x") +
   geom_text(size = 3, position = position_stack(vjust = 0.5)) +
   theme_light() + 
   theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust = 0.5)) +
@@ -180,9 +212,18 @@ player_data_long %>%
        x = "Opponent",
        y = "Score")
 
+score_all_plot
+
+# png("score_all_plot.png", units="in", width=8, height=5, res=300)
+# print(score_all_plot)
+# dev.off()
+
 ```
 
+Looking at the outcomes for all six strategies, we can first see that winStayer actually tied with titfortat, which makes sense given how similar their strategies are to one another. We can also see that when titfortat did lose, it lost only by a very small margin. In the other times it tied, so can say that titfortat is defiantly the most consistent strategy, which is why it is the best when competing against more strategies. winStayer, on the other hand, won with much higher margins most of the time against the other strategies other than titfortat (tied). We can also see that handshaker, the only strategy here without forgiveness, did the worst against titfortat and winStayer, the two strategies that act based on the move of the opponent and have forgiveness.
 
 ## Question 4
 
 **What is the main difference between the game you played here and the tournament Axelrod implemented? How do you think this difference might matter?**
+
+The main difference between the game I played and the tournament Axelrod implemented is worded exactly in the question - a tournament. I only tested six strategies here, but Axelrod's tournament had many more different strategies competing against each other. As we saw in the graph from Question 3, titfortat was the most consistent performer, making it much more likely to succeed than other strategies when facing more opponents. With a limited number of strategies, titfortat lost out to other strategies that focus more the win rather than only basing off the move of its opponent. 
