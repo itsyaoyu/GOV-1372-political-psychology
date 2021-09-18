@@ -181,7 +181,7 @@ I think that the reason titfortat didn't do as well in this round is the fewer n
 
 ```{r Question 2}
 
-player_data_long %>% 
+score_winStayer_plot <- player_data_long %>% 
   filter(player == "winStayer") %>% 
   ggplot(aes(x = opponent, y = score, label = score)) +
   geom_col(fill = "#00bfc4") +
@@ -190,6 +190,12 @@ player_data_long %>%
   labs(title = "winStayer Scores Against Opponents",
        x = "Opponent",
        y = "Score")
+
+score_winStayer_plot
+
+# png("score_winStayer_plot.png", units="in", width=8, height=5, res=300)
+# print(score_winStayer_plot)
+# dev.off()
 
 ```
 
