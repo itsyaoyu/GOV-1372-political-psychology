@@ -1,0 +1,90 @@
+pid3,pid_lean,strongGOP,strongDEM,strongPARTISAN,party,treatment,marryDemocrat,marryRepublican,inPartyHappy,outPartyUnhappy,polarized
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Control,Somewhat happy,Somewhat unhappy,TRUE,TRUE,TRUE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Control,Somewhat happy,Somewhat unhappy,TRUE,TRUE,TRUE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Control,Very happy,Somewhat unhappy,TRUE,TRUE,TRUE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Frequently,Neither happy nor unhappy,Very unhappy,FALSE,TRUE,FALSE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Frequently,Somewhat happy,Somewhat unhappy,TRUE,TRUE,TRUE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Rarely,Neither happy nor unhappy,Neither happy nor unhappy,FALSE,FALSE,FALSE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Control,Very happy,Somewhat unhappy,TRUE,TRUE,TRUE
+NA,NA,FALSE,FALSE,FALSE,NA,Rarely,Somewhat happy,Very unhappy,NA,NA,NA
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Frequently,Very happy,Somewhat unhappy,TRUE,TRUE,TRUE
+Independent,Closer to the Democratic Party,FALSE,FALSE,FALSE,Democrat,Control,Somewhat happy,Very unhappy,TRUE,TRUE,TRUE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Control,Very happy,Somewhat unhappy,TRUE,TRUE,TRUE
+Democrat,NA,FALSE,FALSE,FALSE,Democrat,Rarely,Neither happy nor unhappy,Somewhat unhappy,FALSE,TRUE,FALSE
+Democrat,NA,FALSE,FALSE,FALSE,Democrat,Frequently,Somewhat happy,Somewhat unhappy,TRUE,TRUE,TRUE
+Democrat,NA,FALSE,FALSE,FALSE,Democrat,Frequently,Very happy,Somewhat happy,TRUE,FALSE,FALSE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Control,Somewhat happy,Somewhat unhappy,TRUE,TRUE,TRUE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Frequently,Very happy,Somewhat unhappy,TRUE,TRUE,TRUE
+Democrat,NA,FALSE,FALSE,FALSE,Democrat,Control,Very happy,Very unhappy,TRUE,TRUE,TRUE
+Democrat,NA,FALSE,FALSE,FALSE,Democrat,Frequently,Somewhat happy,Somewhat unhappy,TRUE,TRUE,TRUE
+Democrat,NA,FALSE,FALSE,FALSE,Democrat,Rarely,Somewhat happy,Somewhat unhappy,TRUE,TRUE,TRUE
+Democrat,NA,FALSE,FALSE,FALSE,Democrat,Rarely,Very happy,Neither happy nor unhappy,TRUE,FALSE,FALSE
+Independent,Closer to the Democratic Party,FALSE,FALSE,FALSE,Democrat,Frequently,Somewhat unhappy,Somewhat unhappy,FALSE,TRUE,FALSE
+Democrat,NA,FALSE,FALSE,FALSE,Democrat,Rarely,Neither happy nor unhappy,Neither happy nor unhappy,FALSE,FALSE,FALSE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Frequently,Somewhat happy,Somewhat unhappy,TRUE,TRUE,TRUE
+NA,NA,FALSE,FALSE,FALSE,NA,Control,Neither happy nor unhappy,Very happy,NA,NA,NA
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Frequently,Very happy,Somewhat unhappy,TRUE,TRUE,TRUE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Frequently,Somewhat happy,Somewhat unhappy,TRUE,TRUE,TRUE
+Independent,Closer to the Democratic Party,FALSE,FALSE,FALSE,Democrat,Control,Somewhat happy,Somewhat unhappy,TRUE,TRUE,TRUE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Frequently,Very happy,Somewhat unhappy,TRUE,TRUE,TRUE
+NA,NA,FALSE,FALSE,FALSE,NA,Frequently,Neither happy nor unhappy,Neither happy nor unhappy,NA,NA,NA
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Control,Somewhat happy,Very unhappy,TRUE,TRUE,TRUE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Control,Very happy,Very unhappy,TRUE,TRUE,TRUE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Rarely,Neither happy nor unhappy,Very unhappy,FALSE,TRUE,FALSE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Rarely,Somewhat happy,Somewhat unhappy,TRUE,TRUE,TRUE
+Independent,Closer to the Democratic Party,FALSE,FALSE,FALSE,Democrat,Rarely,Neither happy nor unhappy,Neither happy nor unhappy,FALSE,FALSE,FALSE
+Democrat,NA,FALSE,FALSE,FALSE,Democrat,Rarely,Somewhat happy,Somewhat happy,TRUE,FALSE,FALSE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Control,Very happy,Somewhat unhappy,TRUE,TRUE,TRUE
+Democrat,NA,FALSE,FALSE,FALSE,Democrat,Frequently,Somewhat happy,Neither happy nor unhappy,TRUE,FALSE,FALSE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Frequently,Neither happy nor unhappy,Somewhat unhappy,FALSE,TRUE,FALSE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Frequently,Neither happy nor unhappy,Neither happy nor unhappy,FALSE,FALSE,FALSE
+Another party (please specify),Neither,FALSE,FALSE,FALSE,Independent,Control,Neither happy nor unhappy,Neither happy nor unhappy,NA,NA,NA
+Republican,NA,FALSE,FALSE,FALSE,Republican,Rarely,Somewhat unhappy,Neither happy nor unhappy,FALSE,TRUE,FALSE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Frequently,Very happy,Very unhappy,TRUE,TRUE,TRUE
+Independent,Closer to the Democratic Party,FALSE,FALSE,FALSE,Democrat,Control,Neither happy nor unhappy,Neither happy nor unhappy,FALSE,FALSE,FALSE
+Another party (please specify),Closer to the Democratic Party,FALSE,FALSE,FALSE,Democrat,Frequently,Somewhat happy,Somewhat unhappy,TRUE,TRUE,TRUE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Rarely,Somewhat unhappy,Very unhappy,FALSE,TRUE,FALSE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Rarely,Somewhat happy,Neither happy nor unhappy,TRUE,FALSE,FALSE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Control,Very happy,Somewhat unhappy,TRUE,TRUE,TRUE
+Another party (please specify),Closer to the Democratic Party,FALSE,FALSE,FALSE,Democrat,Frequently,Neither happy nor unhappy,Somewhat unhappy,FALSE,TRUE,FALSE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Rarely,Neither happy nor unhappy,Somewhat unhappy,FALSE,TRUE,FALSE
+Democrat,NA,FALSE,FALSE,FALSE,Democrat,Frequently,Neither happy nor unhappy,Neither happy nor unhappy,FALSE,FALSE,FALSE
+Democrat,NA,FALSE,FALSE,FALSE,Democrat,Control,Neither happy nor unhappy,Neither happy nor unhappy,FALSE,FALSE,FALSE
+Independent,Neither,FALSE,FALSE,FALSE,Independent,Rarely,Neither happy nor unhappy,Neither happy nor unhappy,NA,NA,NA
+NA,NA,FALSE,FALSE,FALSE,NA,Rarely,Somewhat happy,Neither happy nor unhappy,NA,NA,NA
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Rarely,Very happy,Somewhat unhappy,TRUE,TRUE,TRUE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Control,Very happy,Somewhat unhappy,TRUE,TRUE,TRUE
+Independent,Closer to the Democratic Party,FALSE,FALSE,FALSE,Democrat,Frequently,Neither happy nor unhappy,Neither happy nor unhappy,FALSE,FALSE,FALSE
+Independent,Closer to the Democratic Party,FALSE,FALSE,FALSE,Democrat,Control,Neither happy nor unhappy,Neither happy nor unhappy,FALSE,FALSE,FALSE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Frequently,Very happy,Somewhat unhappy,TRUE,TRUE,TRUE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Control,Very happy,Neither happy nor unhappy,TRUE,FALSE,FALSE
+Another party (please specify),Closer to the Democratic Party,FALSE,FALSE,FALSE,Democrat,Rarely,Neither happy nor unhappy,Somewhat unhappy,FALSE,TRUE,FALSE
+Independent,Closer to the Democratic Party,FALSE,FALSE,FALSE,Democrat,Frequently,Somewhat happy,Neither happy nor unhappy,TRUE,FALSE,FALSE
+Independent,Closer to the Democratic Party,FALSE,FALSE,FALSE,Democrat,Control,Somewhat happy,Somewhat unhappy,TRUE,TRUE,TRUE
+Independent,Closer to the Democratic Party,FALSE,FALSE,FALSE,Democrat,Frequently,Very happy,Very unhappy,TRUE,TRUE,TRUE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Rarely,Neither happy nor unhappy,Very unhappy,FALSE,TRUE,FALSE
+Independent,Closer to the Democratic Party,FALSE,FALSE,FALSE,Democrat,Frequently,Somewhat happy,Somewhat unhappy,TRUE,TRUE,TRUE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Frequently,Very happy,Very unhappy,TRUE,TRUE,TRUE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Frequently,Very happy,Somewhat unhappy,TRUE,TRUE,TRUE
+Republican,NA,FALSE,FALSE,FALSE,Republican,Frequently,Very unhappy,Somewhat unhappy,FALSE,TRUE,FALSE
+Independent,Closer to the Democratic Party,FALSE,FALSE,FALSE,Democrat,Rarely,Neither happy nor unhappy,Somewhat unhappy,FALSE,TRUE,FALSE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Rarely,Somewhat happy,Neither happy nor unhappy,TRUE,FALSE,FALSE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Frequently,Neither happy nor unhappy,Very unhappy,FALSE,TRUE,FALSE
+Democrat,NA,FALSE,FALSE,FALSE,Democrat,Control,Neither happy nor unhappy,Neither happy nor unhappy,FALSE,FALSE,FALSE
+Independent,Closer to the Republican Party,FALSE,FALSE,FALSE,Republican,Control,Neither happy nor unhappy,Neither happy nor unhappy,FALSE,FALSE,FALSE
+Republican,NA,TRUE,FALSE,TRUE,Republican,Frequently,Somewhat unhappy,Neither happy nor unhappy,FALSE,TRUE,FALSE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Rarely,Somewhat happy,Very unhappy,TRUE,TRUE,TRUE
+Independent,Neither,FALSE,FALSE,FALSE,Independent,Control,Neither happy nor unhappy,Neither happy nor unhappy,NA,NA,NA
+Republican,NA,FALSE,FALSE,FALSE,Republican,Rarely,Very unhappy,Very unhappy,FALSE,TRUE,FALSE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Control,Very happy,Very unhappy,TRUE,TRUE,TRUE
+NA,NA,FALSE,FALSE,FALSE,NA,Rarely,Neither happy nor unhappy,Somewhat unhappy,NA,NA,NA
+Democrat,NA,FALSE,FALSE,FALSE,Democrat,Frequently,Very happy,Somewhat unhappy,TRUE,TRUE,TRUE
+Democrat,NA,FALSE,FALSE,FALSE,Democrat,Control,Neither happy nor unhappy,Neither happy nor unhappy,FALSE,FALSE,FALSE
+NA,NA,FALSE,FALSE,FALSE,NA,Rarely,Somewhat happy,Somewhat unhappy,NA,NA,NA
+NA,NA,FALSE,FALSE,FALSE,NA,Control,Very happy,Very unhappy,NA,NA,NA
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Frequently,Somewhat happy,Somewhat unhappy,TRUE,TRUE,TRUE
+Independent,Closer to the Democratic Party,FALSE,FALSE,FALSE,Democrat,Frequently,Somewhat unhappy,Somewhat unhappy,FALSE,TRUE,FALSE
+Independent,Closer to the Democratic Party,FALSE,FALSE,FALSE,Democrat,Frequently,Somewhat happy,Somewhat unhappy,TRUE,TRUE,TRUE
+Independent,Closer to the Republican Party,FALSE,FALSE,FALSE,Republican,Rarely,Neither happy nor unhappy,Neither happy nor unhappy,FALSE,FALSE,FALSE
+Independent,Closer to the Republican Party,FALSE,FALSE,FALSE,Republican,Frequently,Neither happy nor unhappy,Neither happy nor unhappy,FALSE,FALSE,FALSE
+Democrat,NA,FALSE,TRUE,TRUE,Democrat,Rarely,Neither happy nor unhappy,Somewhat unhappy,FALSE,TRUE,FALSE

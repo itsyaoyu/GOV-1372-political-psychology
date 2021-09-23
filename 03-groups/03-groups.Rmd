@@ -1,0 +1,145 @@
+---
+title: "Gov 1372 - Groups and Identities"
+author: "your name here"
+date: "September 23, 2021"
+output: pdf_document
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(gt)
+```
+
+# Marriage and Partisan Polarization
+
+Iyengar and Westwood (2014) use answers to questions about a child marrying an in-party or out-party spouse as one way of characterizing affective partisan polarization. Some authors have questioned if the way this question is framed too coarsely. In particular, [Klar et al. (2018)](https://drive.google.com/file/d/1FOAPqfLQweUFaXtzLGhJT_kkBRwHWkLu/view?usp=sharing) argue that, by making the prospective child-in-law's partisanship salient, the marriage question may be picking up on respondents dislike of partisanship in general, rather than a dislike of the opposing party.
+
+The in-class survey you took was a partial replication of the Klar et al. (2018) study. We randomized whether you were asked about a prospective child-in-law who "frequently talks about politics," "rarely talks about politics," or a person whose frequency of discussing politics was not mentioned. This last, control, condition matches the wording of the question used in Iyengar and Westwood (2014). 
+
+**Data Details:**
+
+* File Name: \texttt{Sep23ClassData\_clean.csv}
+
+* Source: These data are from the survey you took in class. The questions are slightly adapted versions of some of the questions used in Klar et al (2018) (see [here](https://oup.silverchair-cdn.com/oup/backfile/Content_public/Journal/poq/82/2/10.1093_poq_nfy014/1/nfy014_suppl_supplementary_appendix.pdf?Expires=1630690741&Signature=1rVJMb33urZQ5JT0Cin5MXKuiMUzvYKWFeemsnLtmpQoD8j9OFd6cNeGneDevTUfK5x9qvK1GP0NlYe99vvdxVuU-fxNZ~XdtnEBMDFMI0n~SU0fhgHHNlPGtkbwG7i6PPOSXfnUZfGp6iwhztgLWoiLHmwbR4Ie34LHGN8GBJlZnLnETdRK7lAG6nDEvRt5RHAi42T7BgzLtDiqqiP9~h9OpOgW-tLCyhp9KLNy6oYUQqzgNuwY6esjG1xTYPpLf1nOyjSQkftAcHi~lzAEFrWYcq~57w6aIDmWJF9wbLQHDK-3eWS7ifn3dy3xL0Fh6OR2NyxVh2-So~ynrn0sag__&Key-Pair-Id=APKAIE5G5CRDK6RD3PGA) for the supplemental material of that study with the original questionnaire, if you are interested).
+
+Variable Name         | Variable Description
+--------------------- | --------------------------------------
+\texttt{pid3}         | Political party preference
+\texttt{pid\_lean}       | If a respondent didn't identify with the Democrats or Republicans in \texttt{QID1}, this indicates to which party (or neither) they feel closer
+\texttt{strongGOP}    | Indicator variable for whether the respondent identifies as a Strong Republican
+\texttt{strongDEM}    | Indicator variable for whether the respondent identifies as a Strong Democrat
+\texttt{strongPARTISAN}| Indicator variable for whether the respondent identifies as a strong member of either major party
+\texttt{party}        | Party variable where those who lean toward either major party are counted as identifying with that party
+\texttt{treatment}    | Which treatment condition the respondent was randomly assigned to
+\texttt{marryDemocrat}| The respondent's answer to how happy they would be if their child married a Democrat
+\texttt{marryRepublican}| The respondent's answer to how happy they would be if their child married a Republican
+\texttt{inPartyHappy} | Indicator variable for whether the respondent would be happy if their child married a member of their own party
+\texttt{outPartyUnhappy}| Indicator variable for whether the respondent would be unhappy if their child married a member of the other major party
+\texttt{polarized}    | Indicator variable for whether the respondent was affectively polarized
+
+Once again, the .Rmd version of this file has code you can use to load the data.
+
+```{r faces, include=FALSE}
+# remember to use the correct file name
+marriage_data <- read_csv('data/Sep23ClassData_clean.csv',
+                          col_types = cols(
+  pid3 = col_character(),
+  pid_lean = col_character(),
+  strongGOP = col_logical(),
+  strongDEM = col_logical(),
+  strongPARTISAN = col_logical(),
+  party = col_character(),
+  treatment = col_character(),
+  marryDemocrat = col_character(),
+  marryRepublican = col_character(),
+  inPartyHappy = col_logical(),
+  outPartyUnhappy = col_logical(),
+  polarized = col_logical()
+))
+```
+
+These data are *not* the raw output from the survey you took. In particular, all of the indicator variables are the result of coding decisions and data processing done by the instructors (based on the procedures used in Klar et al. (2018)). For the first few questions, just open up the data and take a look at it (ask us if you need help viewing the data in spreadsheet format in RStudio).
+
+\newpage
+
+## Question 1
+**How were the \texttt{inPartyHappy} and \texttt{outPartyUnhappy} variables defined? Does this seem like a reasonable procedure? Do you notice any missing values? Why are they missing? How might the missing data affect researchers' inferences?**
+
+inPartyHappy and outPartyUnhappy are defined based on the following variables: **party**, **marryDemocrat**, **marryRepublican**, **inPartyHappy**, and **outPartyUnhappy**. If the party of the respondent is Democrat and if they responded with "Somewhat happy" or "Very happy" for **marryDemocrat** then **inPartyHappy** would be TRUE. Any other responses for **marryDemocrat** would make **inPartyHappy** FALSE, including Neither happy nor unhappy. This would be flipped for **outPartyUnhappy** and be coded the same way for Republicans using **marryRepublican**. **inPartyHappy** and **outPartyUnhappy** are both NA if the respondent is an Independent or did not respond to the party question. These missing data points could shift any inferences from analysis of this data since it does not take into account the ideology of Independents or those who may not identify with the Democratic or Republican party. Otherwise, I believe that this coding makes sense, but I wonder how coding "Neither happy nor unhappy" responses as NA also might shift the inferences.
+
+\newpage
+
+## Question 2
+**How was the \texttt{polarized} variable defined? Is there another way you might consider coding this variable for individual polarization? What would be an advantage and a disadvantage of your alternative approach?**
+
+```{r Question 2}
+marriage_data %>% 
+  count(inPartyHappy, outPartyUnhappy, polarized) %>% 
+  arrange(desc(polarized)) %>% 
+  gt() %>% 
+  tab_header(title = "How is polarized calculated?")
+
+marriage_data %>% 
+  count(strongPARTISAN, inPartyHappy, outPartyUnhappy, polarized) %>% 
+  arrange(desc(polarized)) %>% 
+  gt() %>% 
+  tab_header(title = "How I might calculated polarized")
+```
+
+From this table, we can see that the **polarized** variable is TRUE when **inPartyHappy** and **outPartyUnhappy** is both TRUE. I might code **polarized** to only be TRUE when **strongPARTISAN**, **inPartyHappy**, and **outPartyUnhappy** are all TRUE. Based on the second table, we can see that there are 12 respondents who do not self identify as a strong Democrat or Republican. However, this creates more subjectivity for the **polarized** variable because respondents self-identify if they are strong Democrat or Republican.
+
+\newpage
+
+\bigskip
+\bigskip
+\bigskip
+Now let's take a look at if there are differences in some of the key outcome variables depending on treatment status. Here is an example of how you might make a graph to look at if the rates of unhappiness with a prospective out-party in-law differ depending on the frequency with which they talk about politics.
+
+```{r}
+ggplot(data = marriage_data %>% filter(is.na(outPartyUnhappy)==FALSE)) + 
+  geom_bar(mapping = aes(x = outPartyUnhappy, y = ..prop.., group = 1), stat = "count") + 
+  facet_wrap(~treatment) + ylab("Proportion") + xlab("Unhappy with Out-Party Marriage")
+```
+
+## Question 3
+**Comment on what you see in the example graph. Did the treatment affect unhappiness with a prospective out-party member coming into the family?**
+
+From the example graph, we can see that the treatment of whether a prospective out-party member comes into the family might have a small effect on whether a respondent would be unhappy with out-party marriage. If the out-party member frequently discusses politics, then the respondents are on average 10% more unhappy with out-party marriage. On the other side, if the out-party member rarely discusses politics, then the respondents are on average about 7% less unhappy with out-party marriage.
+
+## Question 4
+**Did the different treatment conditions affect the proportions of people who were affectively polarized? Make a plot and explain what you found.**
+
+```{r Question 4}
+marriage_data %>% 
+  group_by(treatment) %>% 
+  summarize(total = round(sum(polarized, na.rm = TRUE) / n(), digits = 3))
+
+marriage_data %>% 
+  ggplot(aes(x = treatment, y = total, fill = polarized)) +
+  geom_col(position = "dodge")
+
+ggplot(data = marriage_data %>% filter(is.na(polarized)==FALSE)) + 
+  geom_bar(mapping = aes(x = polarized, y = ..prop.., group = 1), stat = "count") + 
+  facet_wrap(~treatment) + ylab("Proportion") + xlab("Unhappy with Out-Party Marriage")
+```
+
+
+
+## Question 5
+**Take a quick look at Figure 1 and Figure 2 in [Klar et al. (2018)](https://academic.oup.com/poq/article-abstract/82/2/379/4996003). How do the results from our in-class data compare to their results? What might explain any differences? If there aren't an notable differences, is there a common pattern across the two datasets that is puzzling? What hypothesis do you have to explain it.**
+
+
+## Question 6 (Data Science Question)
+**We might also be interested in if things looked different for weak vs. strong partisans. Pick one of the two outcome variables you just examined and make a plot that would help us understand if responses within and across treatment groups differ between weak and strong partisans.**
+
+
+
+## Question 7
+**Are there any other issues you can think of that might confound the utility of the marriage question as a measure of affective polarization? If you have any concerns, how might you design a study to evaluate your hypotheses?**
+
+
+## Question 8
+**Based on the data and your work on this assignment, are there any changes you would make to the Iyengar and Westwood (2014) study or the Klar et al. (2018) study or extensions of the research that you would like to see? (For example, would you alter the wording of any questions, change the experimental protocol, or come to any different conclusions?)**
+
