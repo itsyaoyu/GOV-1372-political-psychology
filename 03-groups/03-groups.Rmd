@@ -1,6 +1,6 @@
 ---
 title: "Gov 1372 - Groups and Identities"
-author: "your name here"
+author: "Yao Yu"
 date: "September 23, 2021"
 output: pdf_document
 urlcolor: blue
@@ -9,6 +9,7 @@ urlcolor: blue
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(haven)
 library(gt)
 ```
 
@@ -108,38 +109,74 @@ ggplot(data = marriage_data %>% filter(is.na(outPartyUnhappy)==FALSE)) +
 
 From the example graph, we can see that the treatment of whether a prospective out-party member comes into the family might have a small effect on whether a respondent would be unhappy with out-party marriage. If the out-party member frequently discusses politics, then the respondents are on average 10% more unhappy with out-party marriage. On the other side, if the out-party member rarely discusses politics, then the respondents are on average about 7% less unhappy with out-party marriage.
 
+\newpage
+
 ## Question 4
 **Did the different treatment conditions affect the proportions of people who were affectively polarized? Make a plot and explain what you found.**
 
 ```{r Question 4}
 marriage_data %>% 
-  group_by(treatment) %>% 
-  summarize(total = round(sum(polarized, na.rm = TRUE) / n(), digits = 3))
-
-marriage_data %>% 
-  ggplot(aes(x = treatment, y = total, fill = polarized)) +
-  geom_col(position = "dodge")
-
-ggplot(data = marriage_data %>% filter(is.na(polarized)==FALSE)) + 
-  geom_bar(mapping = aes(x = polarized, y = ..prop.., group = 1), stat = "count") + 
-  facet_wrap(~treatment) + ylab("Proportion") + xlab("Unhappy with Out-Party Marriage")
+  filter(!is.na(polarized)) %>% 
+  mutate(treatment = fct_relevel(treatment, "Control", "Rarely", "Frequently")) %>% 
+  ggplot(aes(x = polarized, y = ..prop.., group = 1)) + 
+  geom_bar(fill = "#00bfc4") + 
+  facet_wrap(~treatment) +
+  theme_light() +
+  labs(
+    title = "Proportions of People Affectively Polarized by Treatment",
+    x = "Polarized",
+    y = "Proportion"
+  )
 ```
 
-
+\newpage
 
 ## Question 5
 **Take a quick look at Figure 1 and Figure 2 in [Klar et al. (2018)](https://academic.oup.com/poq/article-abstract/82/2/379/4996003). How do the results from our in-class data compare to their results? What might explain any differences? If there aren't an notable differences, is there a common pattern across the two datasets that is puzzling? What hypothesis do you have to explain it.**
 
+The results from our in-class data follow the general trends from Klar et al. In Figure 1, the Frequent treatment caused the strongest unhappy with out-party marriage reaction and the rarely treatment caused the weakest unhappy with out-party marriage reaction with the control being somewhere between the two. Data from our class show the same trends although a higher proportion of respondents were unhappy with out-party marriage overall. The data from our class also follow the trends from Figure 2 in Klar et al. with the same exception that higher proportion of respondents were polarized overall. I think that this higher proportion of unhappiness with out-party marriage and polarization can be attributed to the fact that our sample frame was Harvard undergraduates taking a political class whereas the sample frame in Klar et al. was Americans generally. Harvard undergraduates who are taking a political course are definitely more likely have strong political views and care more about politics than the general American population. Hence, a higher proportion of respondents would be unhappy with out-party marriage and polarized.
 
 ## Question 6 (Data Science Question)
 **We might also be interested in if things looked different for weak vs. strong partisans. Pick one of the two outcome variables you just examined and make a plot that would help us understand if responses within and across treatment groups differ between weak and strong partisans.**
 
+```{r}
+# Plotting polarized affects by partisan and treatment
+marriage_data %>% 
+  filter(!is.na(polarized)) %>% 
+  group_by(strongPARTISAN, treatment) %>% 
+  summarize(polarized = sum(polarized) / n(),
+            .groups = "drop") %>% 
+  mutate(
+    treatment = fct_relevel(treatment, "Control", "Rarely", "Frequently"),
+    strongPARTISAN = as.character(strongPARTISAN),
+    strongPARTISAN = recode(
+      strongPARTISAN,
+      "TRUE" = "Strong",
+      "FALSE" = "Weak"
+    ),
+    strongPARTISAN = fct_relevel(strongPARTISAN, "Weak", "Strong")) %>% 
+  ggplot(aes(x = strongPARTISAN, y = polarized)) + 
+  geom_col(fill = "#00bfc4", position = "dodge") + 
+  facet_wrap(~treatment) +
+  theme_light() +
+  labs(
+    title = "Proportions of People Affectively Polarized by Partisan and Treatment",
+    x = "Partisan",
+    y = "Proportion Polarized"
+  )
+```
 
+Evaluating the polarized effect by treatment and **strongPARTISAN** shows us that the polarized effect is not the same across all levels of partisanship. Strong partisans are much more likely to be polarized than weak partisans according to this figure. Klar et al. shows the same trends when splitting by partisanship, which makes sense because weak partisans should care less than strong partisans about in-party and out-party marriage.
+
+\newpage
 
 ## Question 7
 **Are there any other issues you can think of that might confound the utility of the marriage question as a measure of affective polarization? If you have any concerns, how might you design a study to evaluate your hypotheses?**
 
+One concern that I have about using the marriage question as a measure of affective polarization is that the question relates to the child of an individual and not the individually directly. And since parents are typically very protective of their children, even overly protective sometimes, I hypothesize that if an alternative question was asked regarding a co-worker or neighbor, the measure of affective polarization might be slightly weaker. I would design a survey to replicate Klar et al. and assign questions about marriage, co-worker, and neighbor randomly to a random sample of Americans.
 
 ## Question 8
 **Based on the data and your work on this assignment, are there any changes you would make to the Iyengar and Westwood (2014) study or the Klar et al. (2018) study or extensions of the research that you would like to see? (For example, would you alter the wording of any questions, change the experimental protocol, or come to any different conclusions?)**
+
+I would love to extend the Klar et al. study by stratifying respondents into different regions of America (Northeast, South, West, Midwest) and examine how affective polarization differs across the four regions. I would assume that regions with much more polarization such as the South would have a much higher affective polarization response compared to the other regions. It would also be cool to stratify respondents by state, but the cost of that survey might not be able to justify its usefulness.
 
