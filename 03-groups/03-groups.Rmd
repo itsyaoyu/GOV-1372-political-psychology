@@ -115,7 +115,7 @@ From the example graph, we can see that the treatment of whether a prospective o
 **Did the different treatment conditions affect the proportions of people who were affectively polarized? Make a plot and explain what you found.**
 
 ```{r Question 4}
-marriage_data %>% 
+polarized_by_treatment_plot <- marriage_data %>% 
   filter(!is.na(polarized)) %>% 
   mutate(treatment = fct_relevel(treatment, "Control", "Rarely", "Frequently")) %>% 
   ggplot(aes(x = polarized, y = ..prop.., group = 1)) + 
@@ -127,6 +127,12 @@ marriage_data %>%
     x = "Polarized",
     y = "Proportion"
   )
+
+polarized_by_treatment_plot
+
+# png("polarized_by_treatment_plot.png", units="in", width=8, height=5, res=300)
+# print(polarized_by_treatment_plot)
+# dev.off()
 ```
 
 \newpage
@@ -141,7 +147,7 @@ The results from our in-class data follow the general trends from Klar et al. In
 
 ```{r}
 # Plotting polarized affects by partisan and treatment
-marriage_data %>% 
+polarized_by_partisan_treatment_plot <- marriage_data %>% 
   filter(!is.na(polarized)) %>% 
   group_by(strongPARTISAN, treatment) %>% 
   summarize(polarized = sum(polarized) / n(),
@@ -164,6 +170,12 @@ marriage_data %>%
     x = "Partisan",
     y = "Proportion Polarized"
   )
+
+polarized_by_partisan_treatment_plot
+
+# png("polarized_by_partisan_treatment_plot.png", units="in", width=8, height=5, res=300)
+# print(polarized_by_partisan_treatment_plot)
+# dev.off()
 ```
 
 Evaluating the polarized effect by treatment and **strongPARTISAN** shows us that the polarized effect is not the same across all levels of partisanship. Strong partisans are much more likely to be polarized than weak partisans according to this figure. Klar et al. shows the same trends when splitting by partisanship, which makes sense because weak partisans should care less than strong partisans about in-party and out-party marriage.
