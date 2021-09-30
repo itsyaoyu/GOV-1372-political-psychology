@@ -1,0 +1,230 @@
+---
+title: "Gov 1372 - Hierarchies"
+author: "Yao Yu"
+date: "September 30, 2021"
+output: pdf_document
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# library(dplyr) # filter(), group_by(), summarize
+# library(readr) # read_csv()
+# library(ggplot2) # ggplot()
+library(tidyverse)
+library(estimatr) # difference_in_means()
+library(gt)
+library(mice)
+```
+
+# Social Dominance and Politics
+
+Welcome to the fourth Data Exploration Assignment. This week, we read about Social Dominance Theory, and its related psychological construct, Social Dominance Orientation (SDO). SDO is measured through a survey scale consisting of 16 items that we already explored in class. In this assignment, you will explore data on SDO and its relationship with other variables from a nationally representative survey fielded in 2018.
+
+Note that the actionable part of each question is **bolded**. 
+
+**Data Details:**
+
+* File Name: \texttt{sdo\_data.csv}
+
+* Source: These data are condensed and adapted from a [survey](https://wthh.dataforprogress.org/get-the-data) by Data for Progress in 2018 (N = 3144). The data are representative of 2018 voters.
+
+Variable Name         | Variable Description
+--------------------- | --------------------------------------
+\texttt{sdo5}       | Five-point social dominance orientation (SDO) scale: 1. Minimum SDO; ...; 5. Maximum SDO
+\texttt{female}         | Indicator for whether or not the respondent is female. Coded 1 if respondent is female, 0 otherwise.
+\texttt{birthyr}         | Respondent's birth year
+\texttt{educ}        | Education: 1. Didn't graduate HS; 2. HS graduate; 3. Some college; 4. 2-year college; 5. 4-year college; 6. Postgraduate degree
+\texttt{race}  | Race: 1. White; 2. Black or African-American; 3. Hispanic or Latino; 4. Asian or Asian-American; 5. Native American; 6. Mixed Race; 7. Other; 8. Middle Eastern
+\texttt{favor\_trump}    | Favorability of Donald Trump: 1. very unfavorable; ...; 4. very favorable
+\texttt{favor\_blm}    | Favorability of Black Lives Matter: 1. very unfavorable; ...; 4. very favorable
+\texttt{favor\_metoo}        | Favorability of the Me Too movement: 1. very unfavorable; ...; 4. very favorable
+\texttt{american\_customs}       | "The growing number of newcomers from other countries threatens traditional American customs and values": 1. Strongly disagree; ...; 5. Strongly agree
+\texttt{race\_ident}       | "How important is being [respondent's race] to you?": 1. Not at all important; ...; 4. Very important
+\texttt{pid3}       | Three-category party identification: 1. Democrat; 2. Independent; 3. Republican
+\texttt{ideo5}       | Five-category political ideology: 1. Very liberal; ...; 5. Very conservative
+\texttt{fear\_of\_demographic\_change}       | Fear of demographic change in the US: 0. Least fearful; ...; 1. Most fearful
+\texttt{confederate\_flag}       | Is the Confederate flag mostly a symbol of slavery and white supremacy or Southern heritage and culture? Coded either "slavery" or "heritage"
+\texttt{presvote16}       | Vote choice in the 2016 presidential election
+
+## Question 1: REQUIRED
+
+Before looking at data, the science of political psychology often involves building surveys. The teaching team builds the surveys you take using an online survey-building software called Qualtrics. This is often the same software that researchers use to build surveys and collect data that is eventually published in peer-reviewed journals. In this question, you'll create your own brief survey. 
+
+**THIS QUESTION IS REQUIRED FOR ALL STUDENTS. Go to harvard.qualtrics.com and log in using your HarvardKey. Click "Create new project", then select "Survey". You can name your survey whatever you like. Leave the other two drop-down options at their default and click "Create project". Now you can input the SDO scale, which is given below. Make sure to include all 16 items, split into two sub-scales, in your survey. They are split into two sub-scales here, but they don't need to be in your survey. For each item, there should be seven response categories: Strongly favor, Somewhat favor, Slightly favor, Neutral, Slightly oppose, Somewhat oppose, Strongly oppose. Think about the format you think is best for these questions, available under "Question Type". How might the format of the questions affect the responses you get from the survey, or the experience respondents have while taking the survey?  Also consider question ordering and how that may also affect the responses. BE SURE TO UPLOAD A SCREENSHOT OF YOUR QUALTRICS SURVEY TO YOUR BLOG THIS WEEK.**
+
+**Dominance Sub-Scale**
+\begin{enumerate}
+  \item Some groups of people must be kept in their place.
+  \item It's probably a good thing that certain groups are at the top and other groups are at the bottom.
+  \item An ideal society requires some groups to be on top and others to be on the bottom.
+  \item Some groups of people are simply inferior to other groups.
+  \item Groups at the bottom are just as deserving as groups at the top. 
+  \item No one group should dominate in society.
+  \item Groups at the bottom should not have to stay in their place.
+  \item Group dominance is a poor principle.
+\end{enumerate}
+
+**Anti-Egalitarianism Sub-Scale**
+\begin{enumerate}
+  \item We should not push for group equality.
+  \item We shouldn't try to guarantee that every group has the same quality of life.
+  \item It is unjust to try to make groups equal.
+  \item Group equality should not be our primary goal.
+  \item We should work to give all groups an equal chance to succeed.
+  \item We should do what we can to equalize conditions for different groups.
+  \item No matter how much effort it takes, we ought to strive to ensure that all groups have the same chance in life.
+  \item Group equality should be our ideal.
+\end{enumerate}
+
+## Question 2
+
+Now let's take a look at the data.
+```{r}
+
+sdo <- read_csv("data/sdo_data.csv", col_types = cols(
+  sdo5 = col_double(),
+  female = col_double(),
+  age = col_double(),
+  educ = col_double(),
+  race = col_double(),
+  favor_trump = col_double(),
+  favor_blm = col_double(),
+  favor_metoo = col_double(),
+  american_customs = col_double(),
+  race_ident = col_double(),
+  pid3 = col_double(),
+  ideo5 = col_double(),
+  fear_of_demographic_change = col_double(),
+  confederate_flag = col_character(),
+  presvote16 = col_character()
+))
+
+```
+
+**What is the distribution of social dominance orientation in the sample? Make a plot, and report the mean and standard deviation of SDO in the sample. Extend this problem by splitting the plot by party ID of the respondent. Comment on what you find.**
+
+```{r Question 2, warning=FALSE}
+# Setting warning to FALSE to remove false positive errors
+
+# Distribution of social dominance orientation
+sdo %>% 
+  mutate(mean_sdo = mean(sdo5)) %>% 
+  ggplot(aes(x = sdo5)) +
+  geom_histogram(stat = "count", fill = "#00bfc4") +
+  geom_vline(aes(xintercept = mean_sdo), linetype = "dashed") + 
+  theme_light() +
+  labs(title = "Distribution of Social Dominance Orientation",
+       x = "Social Dominance Orientation Score",
+       y = "Number of Responses")
+
+# Reporting mean and standard deviation of social dominance orientation
+sdo %>% 
+  summarize(mean = mean(sdo5),
+            std = sd(sdo5)) %>% 
+  gt() %>% 
+  tab_header(title = "Summary Statistics of SDO") %>%
+  cols_label(
+    mean = "Mean",
+    std = "Standard Deviation"
+  )
+
+# Distribution of social dominance orientation by party
+# Recoding NA as Independent
+sdo %>% 
+  mutate(pid3 = case_when(
+    pid3 == 1 ~ "Democrat",
+    pid3 == 3 ~ "Republican",
+    TRUE ~ "Independent"
+  )) %>% 
+  group_by(pid3) %>% 
+  mutate(mean_sdo = mean(sdo5)) %>% 
+  ungroup() %>% 
+  ggplot(aes(x = sdo5, label = mean_sdo)) +
+  geom_histogram(stat = "count", fill = "#00bfc4") +
+  geom_vline(aes(xintercept = mean_sdo), linetype = "dashed") + 
+  facet_wrap(~pid3, ncol = 1, ) +
+  theme_light() +
+  labs(title = "Distribution of Social Dominance Orientation by Party",
+       x = "Social Dominance Orientation Score",
+       y = "Number of Responses")
+```
+
+
+## Question 3
+
+In the reading for this week, we saw that gender is central to social dominance theory, which predicts that men tend to have higher SDO than women do. **Is this true in this sample as well? Report the average SDO for men and women. Comment on what you find. Extend this question by reporting the difference in means along with the p-value. Is the difference significant at a .05 significance level?**
+
+```{r Question 3, warning=FALSE}
+# Setting warning to FALSE to remove false positive errors
+
+# Distribution of social dominance orientation by sex
+# Recoding NA as Independent
+sdo %>% 
+  mutate(female = case_when(
+    female == 1 ~ "Female",
+    female == 0 ~ "Male"
+  )) %>% 
+  group_by(female) %>% 
+  mutate(mean_sdo = mean(sdo5)) %>% 
+  ungroup() %>% 
+  ggplot(aes(x = sdo5)) +
+  geom_histogram(stat = "count", fill = "#00bfc4") +
+  geom_vline(aes(xintercept = mean_sdo), linetype = "dashed") + 
+  facet_wrap(~female, ncol = 1, ) +
+  theme_light() +
+  labs(title = "Distribution of Social Dominance Orientation by Sex",
+       x = "Social Dominance Orientation Score",
+       y = "Number of Responses")
+
+# Calculating difference in means
+# Calculating the 95% confidence interval
+difference_in_means(formula = sdo5 ~ female, data = sdo)
+```
+
+
+## Question 4
+**What is the correlation between `sdo5` and the `favor_trump` variable? Is the correlation statistically different from zero? You can use cor.test() for this question. Interpret what you find. If you want, extend this question by creating a scatterplot with the line of best fit to visualize the relationship.  You can use geom_point() in the ggplot architecture for this.**
+
+```{r Question 4}
+# Correlation plot
+cor.test(sdo$sdo5, sdo$favor_trump)
+
+# Scatterplot
+sdo %>% 
+  
+  ggplot(aes(x = favor_trump, y = sdo5)) +
+  geom_point() +
+  geom_smooth(formula = y ~ x, method = "lm")
+```
+
+
+## Question 5
+
+Correlation matrices, like the one below, are useful for visualizing the pairwise relationships between several variables. They allow you to see the correlation coefficients of of many relationships at once. **Plot a correlation matrix of the correlation between SDO and some of the variables you think might be related to SDO and to each other. Choose at least 3 variables in addition to SDO. Before you make your plot, briefly discuss why you think the variables might all be related. The package `ggcorrplot` may be useful here. Discuss what you see in your plot.**
+
+Here is an example of what your correlation plot might look like, using the `ggcorrplot` package:
+
+![Example correlation plot.](./corr_plot_example.png)
+
+
+## Question 6: Data Science Question
+
+In this next question, we will use regression to model vote choice as a function of SDO and other variables of interest. This will help us get a fuller picture of the impact of social dominance orientation on political attitudes. We will fit the following model:
+
+$$
+\begin{aligned}
+\text{rep\_vote} = \beta_0 + \beta_1\text{sdo5} + \beta_2\text{female} + \beta_3\text{white} + \beta_4\text{educ} +  \beta_5\text{age} + \beta_6\text{pid3} + \beta_7\text{ideo5} + \epsilon
+\end{aligned}
+$$
+
+You'll notice that the variable `white` doesn't exist in our data set. When doing regression analysis, researchers often code race as a binary - for example, 1 for white and 0 for all non-white. This is done largely to make the regression results easier to interpret. Without turning race into a binary variable, the regression model would instead have several binary variables corresponding to each racial category (e.g. 1 for Black, 0 otherwise; 1 for Hispanic, 0 otherwise, etc.) which can quickly become unwieldy. Try it both ways if you are interested in seeing the difference (though you'll need to turn the `race` variable to a factor).
+
+We also need to adjust the vote choice variable. Currently, `presvote16` codes vote choice for any party in the 2016 election (Dem, Rep, Green, Libertarian) as well as votes for others. This, too, would become unwieldy in a regression. To simplify, we will turn this into an indicator variable for whether or not the respondent voted for the Republican (Donald J. Trump), called `rep_vote`. To be clear, `rep_vote` should be 1 if the respondent voted for Trump, 0 if they voted for someone else, and NA if they did not vote.
+
+**First, create the `white` variable from the `race` variable, as well as `rep_vote` from `presvote16`. Then, fit the linear model described above. Comment on what you see. Is this in line with what we would expect based on social dominance theory? Interpret your results and comment on what you find, especially as it relates to social dominance theory. Note that you can explore other model specifications in the next question.** 
+
+
+## Question 7
+
+**Lastly, just explore the data! This question is open-ended, but make sure you have a theoretical expectation in mind for any relationships between variables you want to explore, and include them in your answer.**
