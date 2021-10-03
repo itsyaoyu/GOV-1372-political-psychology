@@ -15,6 +15,9 @@ library(tidyverse)
 library(estimatr) # difference_in_means()
 library(gt)
 library(mice)
+library(ggcorrplot)
+library(stargazer)
+library(tidymodels)
 ```
 
 # Social Dominance and Politics
@@ -47,6 +50,8 @@ Variable Name         | Variable Description
 \texttt{confederate\_flag}       | Is the Confederate flag mostly a symbol of slavery and white supremacy or Southern heritage and culture? Coded either "slavery" or "heritage"
 \texttt{presvote16}       | Vote choice in the 2016 presidential election
 
+\newpage
+
 ## Question 1: REQUIRED
 
 Before looking at data, the science of political psychology often involves building surveys. The teaching team builds the surveys you take using an online survey-building software called Qualtrics. This is often the same software that researchers use to build surveys and collect data that is eventually published in peer-reviewed journals. In this question, you'll create your own brief survey. 
@@ -76,6 +81,12 @@ Before looking at data, the science of political psychology often involves build
   \item No matter how much effort it takes, we ought to strive to ensure that all groups have the same chance in life.
   \item Group equality should be our ideal.
 \end{enumerate}
+
+![](survey_img.png)
+
+I created the survey by splitting the two category of questions, Dominance and Anti-Egalitarianism, into two matrix tables. Thinking about how this might affect responses compared to other methods, users might change their answers after goign through the statements in each category because they can see all of them at the same time in the matrix table. If I had separated each statement into its own question, then respondents would not be able to go back and change their response. Given that there are not too many statements in this survey, I think that it would be appropriate to separate each statement into its own question. However, if there were more statements that were similar, then I might go back to using the matrix table for ease of coding and responding on the user end.
+
+\newpage
 
 ## Question 2
 
@@ -116,7 +127,8 @@ sdo %>%
   theme_light() +
   labs(title = "Distribution of Social Dominance Orientation",
        x = "Social Dominance Orientation Score",
-       y = "Number of Responses")
+       y = "Number of Responses",
+       caption = "Source: Data for Progress")
 
 # Reporting mean and standard deviation of social dominance orientation
 sdo %>% 
@@ -131,7 +143,7 @@ sdo %>%
 
 # Distribution of social dominance orientation by party
 # Recoding NA as Independent
-sdo %>% 
+sdo_party <- sdo %>% 
   mutate(pid3 = case_when(
     pid3 == 1 ~ "Democrat",
     pid3 == 3 ~ "Republican",
@@ -147,9 +159,19 @@ sdo %>%
   theme_light() +
   labs(title = "Distribution of Social Dominance Orientation by Party",
        x = "Social Dominance Orientation Score",
-       y = "Number of Responses")
+       y = "Number of Responses",
+       caption = "Source: Data for Progress")
+
+sdo_party
+
+# png("sdo_party.png", units="in", width=8, height=5, res=300)
+# print(sdo_party)
+# dev.off()
 ```
 
+From this sample, we can see that the distribution of SDO is skewed right, where most respondents had a SDO score of 1 and it generally trailed off as SDO increased. The mean SDO score was about 2.05 with a standard deviation of about 0.92. However, when we break down the SDO Score distributions by party, we clearly see that Democrats have a much lower SDO score on average than Republicans (The means can be seen with the dotted line). On average, Democrats in the sample have a SDO Score of 1 point lower than Republicans with Independents being in between the two.
+
+\newpage
 
 ## Question 3
 
@@ -160,7 +182,7 @@ In the reading for this week, we saw that gender is central to social dominance 
 
 # Distribution of social dominance orientation by sex
 # Recoding NA as Independent
-sdo %>% 
+sdo_female <- sdo %>% 
   mutate(female = case_when(
     female == 1 ~ "Female",
     female == 0 ~ "Male"
@@ -175,13 +197,23 @@ sdo %>%
   theme_light() +
   labs(title = "Distribution of Social Dominance Orientation by Sex",
        x = "Social Dominance Orientation Score",
-       y = "Number of Responses")
+       y = "Number of Responses",
+       caption = "Source: Data for Progress")
+
+sdo_female
+
+# png("sdo_female.png", units="in", width=8, height=5, res=300)
+# print(sdo_female)
+# dev.off()
 
 # Calculating difference in means
 # Calculating the 95% confidence interval
 difference_in_means(formula = sdo5 ~ female, data = sdo)
 ```
 
+In our sample, Men do on average have a higher SDO Score than women at about 2.2 compared to 1.9. Through a difference in means test, we can confirm that this difference is statisically significant with a p-value of $3.55^{-14}$.
+
+\newpage
 
 ## Question 4
 **What is the correlation between `sdo5` and the `favor_trump` variable? Is the correlation statistically different from zero? You can use cor.test() for this question. Interpret what you find. If you want, extend this question by creating a scatterplot with the line of best fit to visualize the relationship.  You can use geom_point() in the ggplot architecture for this.**
@@ -191,13 +223,28 @@ difference_in_means(formula = sdo5 ~ female, data = sdo)
 cor.test(sdo$sdo5, sdo$favor_trump)
 
 # Scatterplot
-sdo %>% 
-  
+sdo_trump <- sdo %>% 
+  drop_na(favor_trump) %>% 
   ggplot(aes(x = favor_trump, y = sdo5)) +
-  geom_point() +
-  geom_smooth(formula = y ~ x, method = "lm")
+  geom_jitter(width = 0.25, alpha = 0.3) +
+  geom_smooth(formula = y ~ x, method = "lm") +
+  theme_light() +
+  labs(
+    title = "Correlation between Social Dominance Orientation and Favorability of Donald Trump",
+    x = "Favorability of Donald Trump",
+    y = "Social Dominance Orientation",
+    caption = "Source: Data for Progress")
+
+sdo_trump
+
+# png("sdo_trump.png", units="in", width=8, height=5, res=300)
+# print(sdo_trump)
+# dev.off()
 ```
 
+The correlation between sdo5 and favor_trump is about 0.59 and it is statistically significant with a p-value of about $2.2^{-16}$. We can also see this trend on the scatter plot.
+
+\newpage
 
 ## Question 5
 
@@ -207,6 +254,17 @@ Here is an example of what your correlation plot might look like, using the `ggc
 
 ![Example correlation plot.](./corr_plot_example.png)
 
+```{r Question 5}
+sdo %>% 
+  select(sdo5, female, age, educ) %>% 
+  cor() %>% 
+  ggcorrplot(outline.col = "white", lab = TRUE) +
+  labs(title = "Correlation Matrix")
+```
+
+The variables I chose to compared with sdo5 are: female, age, and educ I chose female first based on our reading because evidence suggested that men tend to have a higher SDO score on average compared to women. I chose age and educ as well for similar reasonings. I would expect that older respondents would have higher SDO scores because they tend to be more conservative and more highly educated respondents to have lower SDO scores because they tend to be more liberal and vote Democratic.
+
+\newpage
 
 ## Question 6: Data Science Question
 
@@ -224,7 +282,82 @@ We also need to adjust the vote choice variable. Currently, `presvote16` codes v
 
 **First, create the `white` variable from the `race` variable, as well as `rep_vote` from `presvote16`. Then, fit the linear model described above. Comment on what you see. Is this in line with what we would expect based on social dominance theory? Interpret your results and comment on what you find, especially as it relates to social dominance theory. Note that you can explore other model specifications in the next question.** 
 
+```{r Question 6, results='asis'}
+# Recoding variables
+sdo_model_data <- sdo %>% 
+  mutate(white = (race == 1),
+         rep_vote = (presvote16 == "Trump"))
+
+# Fitting the model
+fit_1 <- lm(formula = rep_vote ~ sdo5 + female + white + educ + age + pid3 + ideo5, 
+            data = sdo_model_data)
+
+# Printing the model
+stargazer(fit_1, header = FALSE, 
+          dep.var.labels = c("Republican Vote"),
+          covariate.labels = c("SDO", "Female", "White", "Education", 
+                               "Age", "Party", "Ideology", "Intercept"),
+          title = "Vote Choice as a Function of SDO and Other Variables of Interest")
+```
+
+There are some aspects of the model that I expect. For example, respondents who are white will on average have a higher probability of voting Republican by about 0.044, a one point increase in education level (higher is more educated) will result in a lower probability of voting Republican by about -0.011, and each increase in age for each respondent will on average increase their probability of voting Republican by about 0.002. However, what did surprise me was that Female respondents in this model were not statistically significant to vote less Republican. Thinking about about why this might be could suggest that the other variables are already accounting for most of the characteristics for voting Republican. I expect that many of these variables might confound with one another since they all have some overlap.
+
+\newpage
 
 ## Question 7
 
 **Lastly, just explore the data! This question is open-ended, but make sure you have a theoretical expectation in mind for any relationships between variables you want to explore, and include them in your answer.**
+
+```{r Question 7, results='asis'}
+# Start by using mice to impute the missing data
+sdo_model_data_imputed <- sdo_model_data %>% 
+  select(sdo5, female, white, educ, age, pid3, ideo5, rep_vote) %>% 
+  mice(printFlag = FALSE) %>% 
+  complete() %>% 
+  as_tibble()
+
+# Splitting the data
+set.seed(1372)
+splits <- initial_split(sdo_model_data_imputed)
+sdo_train <- training(splits)
+sdo_test <- testing(splits)
+
+# Fitting another model
+fit_2 <- lm(formula = rep_vote ~ sdo5 + female + white + educ + age + pid3 + ideo5, 
+            data = sdo_train)
+
+# Predicting on test data
+pred_2 <- predict(fit_2, new_data = sdo_test)
+mse_2 <- mean((sdo_test$sdo5 - pred_2)^2)
+
+# Testing for data without imputed values
+
+# Splitting the data
+set.seed(1372)
+splits <- initial_split(sdo_model_data)
+sdo_train <- training(splits)
+sdo_test <- testing(splits)
+
+# Fitting the model
+fit_1 <- lm(formula = rep_vote ~ sdo5 + female + white + educ + age + pid3 + ideo5, 
+            data = sdo_train)
+
+# Predicting on test data
+pred_1 <- predict(fit_1, new_data = sdo_test)
+mse_1 <- mean((sdo_test$sdo5 - pred_1)^2)
+
+# Making a table of the mse
+tibble(model = c("Model 1", "Model 2"),
+       mse = round(c(mse_1, mse_2), 3)) %>% 
+  gt()
+
+# Printing both models
+stargazer(fit_1, fit_2, header = FALSE,
+          dep.var.labels = c("Republican Vote"), 
+          column.labels = c("No Imputation", "With Imputated Data"),
+          covariate.labels = c("SDO", "Female", "White", "Education", 
+                               "Age", "Party", "Ideology", "Intercept"),
+          title = "Vote Choice as a Function of SDO and Other Variables of Interest")
+```
+
+I wanted to explore how imputation of the missing values in this dataset could affect our model. Using the `mice` package, I imputed missing values in the dataset and re-created the same model. As shown in the table, there is only a minimal difference among the coefficients and a small difference in mse scores when testing both models after conducting a training and testing split of the data. So, overall there is no real difference made as there are not many missing values in this dataset to begin with.
