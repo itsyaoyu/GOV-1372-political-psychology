@@ -119,7 +119,7 @@ sdo <- read_csv("data/sdo_data.csv", col_types = cols(
 # Setting warning to FALSE to remove false positive errors
 
 # Distribution of social dominance orientation
-sdo %>% 
+sdo_distribution <- sdo %>% 
   mutate(mean_sdo = mean(sdo5)) %>% 
   ggplot(aes(x = sdo5)) +
   geom_histogram(stat = "count", fill = "#00bfc4") +
@@ -129,6 +129,12 @@ sdo %>%
        x = "Social Dominance Orientation Score",
        y = "Number of Responses",
        caption = "Source: Data for Progress")
+
+sdo_distribution
+
+# png("sdo_distribution.png", units="in", width=8, height=5, res=300)
+# print(sdo_distribution)
+# dev.off()
 
 # Reporting mean and standard deviation of social dominance orientation
 sdo %>% 
