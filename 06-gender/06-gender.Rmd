@@ -308,7 +308,7 @@ suffrage_total_year <- s_data %>%
   labs(
     title = "Total Number of Countries with and without Women's Suffrage",
     x = "",
-    y = "Average Number of Disputes Initiated",
+    y = "Number of Countries",
     color = "Women's Suffrage Status"
   )
 
