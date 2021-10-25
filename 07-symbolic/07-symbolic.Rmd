@@ -195,7 +195,7 @@ It might be useful to more clearly illustrate the differences in the trend lines
 
 ```{r Question 4c}
 # group_favorability_the_police
-protest_df_bydate %>% 
+police_favorability_all <- protest_df_bydate %>% 
   drop_na(group_favorability_the_police) %>% 
   group_by(day_running) %>% 
   summarize(avg_group_favorability_the_police = mean(group_favorability_the_police),
@@ -212,6 +212,12 @@ protest_df_bydate %>%
     x = "Days to the George Floyd Protests",
     y = "Favorability"
   )
+
+police_favorability_all
+
+# png("police_favorability_all_plot.png", units="in", width=8, height=5, res=300)
+# print(police_favorability_all)
+# dev.off()
 
 # discrimination_blacks
 protest_df_bydate %>% 
@@ -293,7 +299,7 @@ As we have learned partisanship heavily influences how people take in and proces
 
 ```{r Question 5b}
 # group_favorability_the_police
-protest_df_bydate %>% 
+police_favorability_party <- protest_df_bydate %>% 
   mutate(pid3 = case_when(
     pid7 < 4 ~ "Democrat",
     pid7 == 4 ~ "Independent",
@@ -318,6 +324,12 @@ protest_df_bydate %>%
     x = "Days to the George Floyd Protests",
     y = "Favorability"
   )
+
+police_favorability_party
+
+# png("police_favorability_party_plot.png", units="in", width=8, height=5, res=300)
+# print(police_favorability_party)
+# dev.off()
 
 # discrimination_blacks
 protest_df_bydate %>% 
@@ -500,7 +512,7 @@ probit_fit <- polr(as.factor(group_favorability_the_police) ~ pid7 + before,
                   method = "probit", data = protest_df_bydate)
 
 stargazer(fit_1, logit_fit, probit_fit, header = FALSE,
-          dep.var.labels = c("Police Favorability"),
+          dep.var.labels = c("Police Favorability", "Police Favorability"),
           covariate.labels = c("Party ID", "Before Protests Onset", "Constant"),
           title = "Police Favorability as a Function of Party ID and Protests")
 ```
