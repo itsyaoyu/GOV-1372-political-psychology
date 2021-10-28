@@ -9,3 +9,4 @@ Code, data, and figures used in my GOV 1372 Political Psychology Blog posts
 4. [Hierarchy](https://itsyaoyu.com/blog/gov-1372-hierarchy/)
 5. [Personality](https://itsyaoyu.com/blog/gov-1372-personality/)
 6. [Gender](https://itsyaoyu.com/blog/gov-1372-gender/)
+7. [Symbolic](https://itsyaoyu.com/blog/gov-1372-symbolic/)
