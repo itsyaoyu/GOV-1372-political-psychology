@@ -1,0 +1,678 @@
+---
+title: 'Data Exploration: Intergroup Contact'
+author: "Yao Yu"
+date: "October 28, 2021"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+  word_document: default
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(estimatr)
+library(haven)
+library(stargazer)
+library(effsize)
+library(jtools)
+library(tidytext)
+library(gt)
+library(cowplot)
+library(modeest)
+```
+
+This week, we discussed the importance of intergroup contact in settings like neighborhoods, public transportation, and sports leagues. All of these studies ensured or inferred that intergroup contact actually took place. However, some researchers have studied the possibility that even \textit{imagined} contact with a member of an outgroup can change people's perception of that group. In this Data Exploration assignment we will explore two datasets derived from imagined intergroup contact experiments. In part one, you will look at data from a recent study conducted by Dong Wang, Iain Johnston (a professor in the Harvard Government Department) and Baoyu Wang. Wang et al. (2021) conducted an experiment on a group of Chinese students to determine if imagined social contact could reduce antipathy toward Japanese people. In part two, you will look at the results of our in-class survey, which tested whether imagined social contact with a member of one's less-preferred political party would change attitudes toward members of that party. You can do either part first, but you will probably find the exercise most valuable if you do some of each part.
+
+If you have a question about any part of this assignment, please ask! Note that the actionable part of each question is **bolded**.
+
+# Part One: Chinese Students and Perception of Japanese People
+
+**Data Details:**
+
+* File Name: \texttt{ChinaJapanData.csv}
+
+* Source: These data are from (Wang et al. (2021))[https://drive.google.com/open?id=111pbDphCslbMXbmPBwKNQeQipFAXEgWm&authuser=renos%40g.harvard.edu&usp=drive_fs]. Please take some time to skim this paper in order to get a feel for the population they studied, their key hypotheses, and their experimental procedure. Subjects were asked to imagine a bus ride, either one in which they talked to a Japanese person (treatment) or just enjoyed the scenery (control). They were then asked a series of questions to assess their affective feelings toward Japanese and Chinese people, their perceptions of the characteristics of Japanese and Chinese identity, and demographic, policy, and pschological questions to serve as control variables.
+
+Variable Name         | Variable Description
+--------------------- | --------------------------------------
+\texttt{subject}         | Anonymized identifier for each experimental subject
+\texttt{treated}  | Binary variable equal to \texttt{TRUE} if the subject was told to imagine a bus ride with a Japanese person (the treatment) and \texttt{FALSE} if the subject was told to imagine the scenery on a bus ride (control)
+\texttt{JapanPos}  | Affective feeling about Japanese people ranging from 1 (negative) to 7 (positive)
+\texttt{JapanWarm}  | Affective feeling about Japanese people ranging from 1 (cool) to 7 (warm)
+\texttt{JapanAdmire}  | Affective feeling about Japanese people ranging from 1 (loathing) to 7 (admiration)
+\texttt{JapanRespect}  | Affective feeling about Japanese people ranging from 1 (contempt) to 7 (respect)
+\texttt{ChinaPos}  | Affective feeling about Chinese people ranging from 1 (negative) to 7 (positive) 
+\texttt{ChinaWarm}  | Affective feeling about Chinese people ranging from 1 (cool) to 7 (warm)  
+\texttt{ChinaAdmire}  | Affective feeling about Chinese people ranging from 1 (loathing) to 7 (admiration) 
+\texttt{ChinaRespect}  | Affective feeling about Chinese people ranging from 1 (contempt) to 7 (respect) 
+\texttt{PosDiff}  | Difference between the Chinese and Japanese positivity score
+\texttt{WarmDiff}  | Difference between the Chinese and Japanese warmth score
+\texttt{AdmireDiff}  | Difference between the Chinese and Japanese admiration score
+\texttt{RespectDiff}  | Difference between the Chinese and Japanese respect score 
+\texttt{JapanID\_avg}  | Average of 30 ratings of Japanese people on identity trait pairs, coded from 1 to 7 where higher numbers are less favorable; see p. 12 of Wang et al. (2021) for details
+\texttt{ChinaID\_avg}  | Average of the same 30 identity ratings of Chinese people
+\texttt{ID\_diff\_avg}  | Difference between \texttt{ChinaID\_avg} and \texttt{JapanID\_avg}
+\texttt{age}  | Age in years
+\texttt{gender}  | Gender, coded 1 for male and 0 for female
+\texttt{jpfriend}  | Indicator variable for if subject has a Japanese friend (1) or does not (0)
+\texttt{MediaInd}  | Attitude toward media independence from the government ranging from 1 (strongly oppose) to 5 (strongly support)
+\texttt{freetrade}  | Indicator variable for if subject supports free trade (1) or does not (0)
+\texttt{school\_major}  | Categorical variable denoting major in school; 1 = social sciences, 2 = humanities, 3 = sciences and engineering, 4 = law
+\texttt{PrejControl}  | Motivation to Control Prejudice index; an average of 17 items rated from 1 to 7 in which higher scores denote a greater motivation to control the expression of prejudice
+
+```{r}
+# load the data
+ChinaJapan <- read_csv('ChinaJapanData.csv',
+                       col_types = cols(
+  .default = col_double(),
+  treated = col_logical()
+))
+```
+
+## Question 1
+
+### Part a
+When surveys ask a number of questions to try and measure the same underlying concept, it is common to make a summary index by taking the average of all these items. **Create new variables for the average affective feeling toward Japanese people, the average affective feeling toward Chinese people, and the average difference between the two.** 
+
+```{r}
+# Average Difference
+chinajapan_clean <- ChinaJapan %>% 
+  group_by(subject) %>% 
+  mutate(JapanAvg = mean(c(JapanPos, JapanWarm, JapanAdmire, JapanRespect)),
+         ChinaAvg = mean(c(ChinaPos, ChinaWarm, ChinaAdmire, ChinaRespect)),
+         AvgDiff = JapanAvg - ChinaAvg) %>% 
+  ungroup()
+```
+
+
+### Part b
+
+**For at least one of the individual affect items and all three affect averages you created in part a (China, Japan, and the difference between them), report mean values for the treatment and control groups, an estimate of the difference between those groups, and the results of a test for statistical significance. Did imagined social contact change subjects' affect toward Japanese people? Chinese people? What about their affective polarization?**
+
+```{r}
+# Means
+chinajapan_clean_mean <- chinajapan_clean %>% 
+  group_by(treated) %>% 
+  summarize(avgJapanPos = mean(JapanPos),
+            avgChinaPos = mean(ChinaPos),
+            avgJapanAvg = mean(JapanAvg),
+            avgChinaAvg = mean(ChinaAvg),
+            avgAvgDiff = mean(AvgDiff),
+            .groups = "drop")
+
+chinajapan_clean_mean
+
+# Difference
+chinajapan_clean_diff <- chinajapan_clean_mean %>% 
+  pivot_longer(avgJapanPos:avgAvgDiff, names_to = "Measurement", values_to = "Measure") %>% 
+  pivot_wider(names_from = treated, values_from = Measure) %>% 
+  rename(
+    treated = `TRUE`,
+    control = `FALSE`
+  ) %>% 
+  mutate(Difference = treated - control)
+
+chinajapan_clean_diff %>% 
+  gt() %>% 
+  tab_header(title = "Estimated Difference between treatment and control",
+             subtitle = "in the Wang et al. (2021) dataset") %>%
+  fmt_number(
+    columns = 2:4,
+    decimals = 3
+  )
+
+# T-Test
+t.test(JapanPos ~ treated, chinajapan_clean)
+t.test(ChinaPos ~ treated, chinajapan_clean)
+t.test(JapanAvg ~ treated, chinajapan_clean)
+t.test(ChinaAvg ~ treated, chinajapan_clean)
+t.test(AvgDiff ~ treated, chinajapan_clean)
+```
+
+From the tests of statistical significance, we can see that the imagined social contact changes subjects’ affect toward Japanese people but not Chinese people. On average, respondents who underwent the treatment of imagining a bus ride with a Japanese person rated Japanese people more favorably by 0.17 to 0.90 at the 95% confidence level.
+
+### Part c
+
+Researchers often present the size of an experimental effect in terms of Cohen's D, which calculates the ratio of the treatment effect to the standard deviation. This is a way to understand if a treatment effect is substantively large, in addition to statistically significant. A common "rule of thumb" is that a Cohen's D score of 0.2 is small, 0.5 is medium, and 0.8 is large. Wang et al. (2021) present Cohen's D scores in the tables throughout their article.
+
+Here is a useful interactive visualization of Cohen's D: 
+https://rpsychologist.com/cohend/
+
+**Using the \texttt{cohen.d()} function, for each of the variables you used in Part b above, calculate a Cohen's D and interpret whether it is small, medium, or large.  Do these "rule of thumb" interpretations match your intuitive interpretation? Are any of the differences of means stastically significant, yet substantively small according to the Cohen's D score?** 
+
+```{r}
+cohen.d(JapanPos ~ as.factor(treated), chinajapan_clean)
+cohen.d(ChinaPos ~ as.factor(treated), chinajapan_clean)
+cohen.d(JapanAvg ~ as.factor(treated), chinajapan_clean)
+cohen.d(ChinaAvg ~ as.factor(treated), chinajapan_clean)
+cohen.d(AvgDiff ~ as.factor(treated), chinajapan_clean)
+```
+
+From the Cohen's d outputs, we can see that the average affective feeling toward Japanese people is medium while everything else is small or negligible. This makes sense as we saw earlier that this was the group with the most shift in difference by treatment statistically speaking.
+
+## Question 2
+
+### Part a
+
+Wang et al. (2021) also investigate whether imagined social contact changes Chinese students' perception of the characteristics associated with Japanese identiy, as well as the difference in perception of the semantic content associated with Chinese and Japanese identity. They use 30 pairs of opposite phrases (like "frank/hypocritical," "civilized/barbaric," and "peace-loving/belligerent") on scales from 1 to 7 to measure these identity traits (higher scores are less favorable). We've provided you with the averages of these thirty items for perception of Chinese and Japanese identites, as well as the average difference between them. **For all three of these indices, report average values for the treatment and control groups, an estimate of the difference between those groups, and the results of a test for statistical significance. How do the experimental effects of imagined contact on identity traits compare to the effects on affect?**
+
+```{r}
+# Means
+chinajapan_clean_mean_2 <- chinajapan_clean %>% 
+  group_by(treated) %>% 
+  summarize(avgJapanID_avg = mean(JapanID_avg),
+            avgChinaID_avg = mean(ChinaID_avg),
+            avgID_diff_avg = mean(ID_diff_avg),
+            .groups = "drop")
+
+chinajapan_clean_mean_2
+
+# Difference
+chinajapan_clean_diff <- chinajapan_clean_mean_2 %>% 
+  pivot_longer(avgJapanID_avg:avgID_diff_avg, names_to = "Measurement", values_to = "Measure") %>% 
+  pivot_wider(names_from = treated, values_from = Measure) %>% 
+  rename(
+    treated = `TRUE`,
+    control = `FALSE`
+  ) %>% 
+  mutate(Difference = treated - control)
+
+chinajapan_clean_diff
+
+# T-Test
+t.test(JapanID_avg ~ treated, chinajapan_clean)
+t.test(ChinaID_avg ~ treated, chinajapan_clean)
+t.test(ID_diff_avg ~ treated, chinajapan_clean)
+```
+
+The experimental effects of imagined contact on identity traits result in more favorable scores on average across all groups. This aligns with the effects on affect as seen in the question above.
+
+### Part b
+
+A useful way to visualize these effects of the experimental treatment is with a treatment effects plot. Below, we provide some sample code for how to make a treatment effects plot based on the t-tests you conducted in part a of this question. **Please work through the code to make sure you understand it and interpret the findings depicted in the resulting plot.** See p. 2 of Mousa (2020) from this week's readings for a good example of plots like this.
+
+```{r}
+# First, store the t-tests as new objects in R
+JapanIDdiff <- difference_in_means(JapanID_avg ~ treated, data = ChinaJapan)
+ChinaIDdiff <- difference_in_means(ChinaID_avg ~ treated, data = ChinaJapan)
+Diff_in_ID_diff <- difference_in_means(ID_diff_avg ~ treated, data = ChinaJapan)
+
+# These objects are called lists; they store values like point estimates and confidence intervals of statistical tests
+
+# Next, we extract information from these lists and save them as vectors that you will use to make the data for the plot
+outcomes <- c('Japanese Identity Rating', 'Chinese Identity Rating', 'Identity Difference') # for this vector we have to make it ourselves based on what we want the plot's labels to be
+pointests <- c(JapanIDdiff$coefficients, ChinaIDdiff$coefficients, Diff_in_ID_diff$coefficients)
+lowbounds <- c(JapanIDdiff$conf.low, ChinaIDdiff$conf.low, Diff_in_ID_diff$conf.low)
+upbounds <- c(JapanIDdiff$conf.high, ChinaIDdiff$conf.high, Diff_in_ID_diff$conf.high)
+
+# Combine the vectors into a data frame
+treatment_effect_plot_data <- tibble(outcomes,pointests,lowbounds,upbounds)
+
+# Make the plot
+ggplot(treatment_effect_plot_data, mapping=aes(x=factor(outcomes, levels = outcomes), y=pointests, ymin=lowbounds, ymax=upbounds)) + geom_pointrange() + geom_hline(yintercept = 0, linetype = 'dashed') + coord_flip() + xlab('Experimental Outcomes') + ylab('Treatment Effect (with 95% CI)')
+
+# Why did we use the factor() function for defining the x-axis? If you take the factor() function with the `levels =' argument out of the code, the x-axis will default to being in alphabetical order.
+```
+
+
+### Part c
+
+**Make your own treatment effects plot to visualize the effect of treatment on all four items associated with affect toward Japanese people and the index averaging those items. Interpret your results.**
+
+```{r}
+# t-test
+JapanPosdiff <- difference_in_means(JapanPos ~ treated, data = ChinaJapan)
+JapanWarmdiff <- difference_in_means(JapanWarm ~ treated, data = ChinaJapan)
+JapanAdmirediff <- difference_in_means(JapanAdmire ~ treated, data = ChinaJapan)
+JapanRespectdiff <- difference_in_means(JapanRespect ~ treated, data = ChinaJapan)
+
+# Outcomes
+treatment_effect_plot_data <- tibble(
+  outcomes = c("Japanese Positive Rating", "Japanese Warm Rating", 
+               "Japanese Admiration Rating", "Japanese Respect Rating"),
+  pointests = c(JapanPosdiff$coefficients, JapanWarmdiff$coefficients,
+                JapanAdmirediff$coefficients, JapanRespectdiff$coefficients),
+  lowbounds = c(JapanPosdiff$conf.low, JapanWarmdiff$conf.low,
+                JapanAdmirediff$conf.low, JapanRespectdiff$conf.low),
+  upbounds = c(JapanPosdiff$conf.high, JapanWarmdiff$conf.high,
+                JapanAdmirediff$conf.high, JapanRespectdiff$conf.high),
+)
+
+# Make the plot
+japanese_treatment_effect_plot <- treatment_effect_plot_data %>% 
+  ggplot(aes(x = factor(outcomes, levels = outcomes), y = pointests, ymin = lowbounds, ymax = upbounds)) + 
+  geom_pointrange() + 
+  geom_hline(yintercept = 0, linetype = 'dashed') + 
+  coord_flip() + 
+  labs(
+    title = "Effect of Treatment on Affect Toward Japanese People",
+    x = "Experimental Outcomes",
+    y = "Treatment Effect (with 95% CI)"
+  ) +
+  theme_light()
+
+japanese_treatment_effect_plot
+
+# png("japanese_treatment_effect_plot.png", units="in", width=8, height=5, res=300)
+# print(japanese_treatment_effect_plot)
+# dev.off()
+```
+
+```{r}
+JapanAffect_plot <- ChinaJapan %>% 
+  select(treated, JapanPos:JapanRespect) %>% 
+  pivot_longer(JapanPos:JapanRespect, names_to = "Affect", values_to = "Rating") %>% 
+  mutate(treated = case_when(
+    treated == TRUE ~ "treatment",
+    TRUE ~ "control"
+  )) %>% 
+  group_by(treated, Affect) %>% 
+  summarize(
+    treated = treated,
+    Affect = Affect,
+    Rating = Rating,
+    mean_rating = mean(mfv(Rating)),
+    .groups = "drop"
+  ) %>% 
+  ggplot(aes(x = Rating, fill = treated)) +
+  geom_density(alpha = 0.3) +
+  geom_vline(aes(xintercept = mean_rating), linetype = "dashed") +
+  facet_wrap(~Affect) +
+  theme_light() +
+  labs(
+    title = "Most Common Affect Rating Averages",
+    subtitle = "Towards Japanese People",
+    x = "Rating",
+    y = "Density",
+    fill = ""
+  )
+
+ChinaAffect_plot <- ChinaJapan %>% 
+  select(treated, ChinaPos:ChinaRespect) %>% 
+  pivot_longer(ChinaPos:ChinaRespect, names_to = "Affect", values_to = "Rating") %>% 
+  mutate(treated = case_when(
+    treated == TRUE ~ "treatment",
+    TRUE ~ "control"
+  )) %>% 
+  group_by(treated, Affect) %>% 
+  summarize(
+    treated = treated,
+    Affect = Affect,
+    Rating = Rating,
+    mean_rating = mean(mfv(Rating)),
+    .groups = "drop"
+  ) %>% 
+  ggplot(aes(x = Rating, fill = treated)) +
+  geom_density(alpha = 0.3) +
+  geom_vline(aes(xintercept = mean_rating), linetype = "dashed") +
+  facet_wrap(~Affect) +
+  theme_light() +
+  labs(
+    title = "Most Common Affect Rating Averages",
+    subtitle = "Towards Chinese People",
+    x = "Rating",
+    y = "Density",
+    fill = ""
+  )
+
+ChinaJapanAffect_grid <- plot_grid(JapanAffect_plot + 
+                                  theme(legend.position = "none"), 
+                                ChinaAffect_plot + 
+                                  theme(legend.position = "none"))
+legend <- get_legend(JapanAffect_plot + 
+                       theme(legend.position = "bottom"))
+
+ChinaJapanAffect_grid_legend <- plot_grid(ChinaJapanAffect_grid, legend, ncol = 1, rel_heights = c(1, .1))
+
+ChinaJapanAffect_grid_legend
+
+# png("ChinaJapanAffect_grid.png", units="in", width=10, height=5, res=300)
+# print(ChinaJapanAffect_grid_legend)
+# dev.off()
+```
+
+
+## Question 3: Data Science Question
+
+### Part a
+
+Pick one of the two average difference variables (\texttt{AffectDiff\_avg} or \texttt{ID\_diff\_avg}) to use as a dependent variable for this question. Then **pick at least two of the control variables and write hypotheses about how they would affect your chosen dependent variable.** Do this before you do part b of this question.
+
+ID_diff_avg ~ jpfriend + age * treated
+
+Using `age`, `jpfriend`, and `treated` as explanatory variables for `ID_diff_avg`, I hypothesize that older people who are also in the treatement will have more negative attitudes towards Japanese due to prior biases towards Japanese people and therefore a higher `ID_diff_avg` difference However, I also hypothesize that people with a Japanese friend will have more positive attitudes towards Japanese and therefore a lower `ID_diff_avg` difference on average than people who do not have a Japanese friend,
+
+
+### Part b
+
+**Use multiple regression to test your hypotheses. Be sure to include your selected control variables and the treatment variable at a minimum, bu the exact form of the model is up to you. Report and interpret the regression coefficients in the context of your hypotheses.**
+
+```{r, results='asis'}
+fit_1 <- lm(formula = ID_diff_avg ~ jpfriend + age * treated, data = ChinaJapan)
+
+stargazer(fit_1, header = FALSE)
+```
+
+From the model, we can see that the results do not fully support my original hypothesis as no coefficients are statistically significant. From the model, having a Japanese friend is associated with a 0.053 score decrease on average in ID_diff_avg. However, this result is not statistically significant and cannot be differentiated from noise from just what we have. An increase in age by one leads to on average a super small change of 0.0001 in ID_diff_avg. Treated respondents also have a small change of 0.090 on average. However, the interaction between age and treated leads to a lower ID_diff_avg difference by 0.016 on average. This goes against my original hypothesis that older treated individuals wil have a higher ID_diff_avg difference due to prior biases.
+
+### Part c
+Coefficient plots can be a good way to display main results from a regression in a way that is visually easier to interpret than a table. They are very similar to the treatment effect plots we made in the previous question. **Make a coefficient plot with the point estimates and 95\% confidence intervals for all of your regression coefficients other than the intercept. Be sure to include some kind of line at zero to aid interpretation of statistical significance.** Take a look at p. 5 of Brown et al. (2021) from this week's reading for an example of a coefficient plot (although note that that is plotting one regression coefficient across multiple regression specifications; we're asking you to plot multiple regression coefficients from one regression model).
+
+```{r}
+plot_summs(fit_1, scale = TRUE, plot.distributions = TRUE,
+           model.names = c("Model 1"),
+           coefs = c("Age:Treated" = "age:treatedTRUE", 
+                     "Treated" = "treatedTRUE", 
+                     "Age" = "age",
+                     "Japanese Friend" = "jpfriend")) +
+  labs(title = "Coefficient Plot")
+```
+
+
+# Part Two: Harvard Students and Perception of Members of the Other Party
+
+**Data Details:**
+
+* File Name: \texttt{Oct28ClassData.csv}
+
+* Source: These data are from the Qualtrics survey you all took last week. About half of you were in the control condition and were simply asked to imagine a bus ride with beautiful scenery; the other half were in the treatment condition and were asked to imagine a bus ride next to a member of your non-preferred US political party. All students were then asked a series of questions to assess their affective feelings toward Democrats and Republicans and their perceptions of the characteristics of Democratic and Republican identity. Additional control variables were merged from the class background survey.
+
+Variable Name         | Variable Description
+--------------------- | --------------------------------------
+\texttt{Treated}  | Binary variable equal to \texttt{TRUE} if the subject was told to imagine a bus ride with a member of the opposing political party (the treatment) and \texttt{FALSE} if the subject was told to imagine the scenery on a bus ride (control)
+\texttt{ClosestParty}  | Which of the two major US political parties the subject feels closes to
+\texttt{strongPARTISAN}  | Binary variable coded as \texttt{TRUE} if subject self-identifies as a strong partisan and \texttt{FALSE} otherwise
+\texttt{ControlScenario\_1}  | First text-based reflection of the imagined bus ride for those in the control condition
+\texttt{ControlScenario\_2}  | Second text-based reflection of the imagined bus ride for those in the control condition
+\texttt{ControlScenario\_3}  | Third text-based reflection of the imagined bus ride for those in the control condition 
+\texttt{TreatmentScenario\_1}  | First text-based reflection of the imagined bus ride for those in the treatment condition  
+\texttt{TreatmentScenario\_2}  | Second text-based reflection of the imagined bus ride for those in the treatment condition 
+\texttt{TreatmentScenario\_3}  | Third text-based reflection of the imagined bus ride for those in the treatment condition 
+\texttt{RepublicanAffect\_1}  | Affective feeling about Republicans ranging from 1 (negative) to 7 (positive)
+\texttt{RepublicanAffect\_2}  | Affective feeling about Republicans ranging from 1 (cool) to 7 (warm)
+\texttt{RepublicanAffect\_3}  | Affective feeling about Republicans ranging from 1 (loathing) to 7 (admiration)
+\texttt{RepublicanAffect\_4}  | Affective feeling about Republicans ranging from 1 (contempt) to 7 (respect) 
+\texttt{DemocraticAffect\_1}  | Affective feeling about Democrats ranging from 1 (negative) to 7 (positive)
+\texttt{DemocraticAffect\_2}  | Affective feeling about Democrats ranging from 1 (cool) to 7 (warm)
+\texttt{DemocraticAffect\_3}  | Affective feeling about Democrats ranging from 1 (loathing) to 7 (admiration)
+\texttt{DemocraticAffect\_4}  | Affective feeling about Democrats ranging from 1 (contempt) to 7 (respect)
+\texttt{RepublicanIdentity\_1}  | Rating of Republican identity trait from 1 (obstinate) to 7 (open-minded) (note that identity favorability is associated with the higher number, unlike in the data from Part One)
+\texttt{RepublicanIdentity\_2}  | Rating of Republican identity trait from 1 (evil) to 7 (moral) 
+\texttt{RepublicanIdentity\_3}  | Rating of Republican identity trait from 1 (arrogant) to 7 (humble)
+\texttt{RepublicanIdentity\_4}  | Rating of Republican identity trait from 1 (cruel) to 7 (kind)
+\texttt{DemocraticIdentity\_1}  | Rating of Democratic identity trait from 1 (obstinate) to 7 (open-minded)
+\texttt{DemocraticIdentity\_2}  | Rating of Democratic identity trait from 1 (evil) to 7 (moral) 
+\texttt{DemocraticIdentity\_3}  | Rating of Democratic identity trait from 1 (arrogant) to 7 (humble)
+\texttt{DemocraticIdentity\_4}  | Rating of Democratic identity trait from 1 (cruel) to 7 (kind)
+\texttt{gender}  | Character variable reflecting self-identified gender
+\texttt{college\_stats}  | Binary variable coded as \texttt{TRUE} if subject self-identifies as having taken college-level statistics and \texttt{FALSE} otherwise
+\texttt{year}  | Year in college from 1 to 4
+\texttt{US}  | Binary variable coded as \texttt{TRUE} if subject self-identifies as having been born in the United States and \texttt{FALSE} otherwise
+\texttt{InPartyAffect\_(1-4)}  | Affective feelings about the in-party using the same numbering scheme as above
+\texttt{InPartyAffect\_avg}  | Average affective feelings about the in-party
+\texttt{OutPartyAffect\_(1-4)}  | Affective feelings about the out-party using the same numbering scheme as above
+\texttt{OutPartyAffect\_avg}  | Average affective feelings about the out-party
+\texttt{InPartyIdentity\_(1-4)}  | Identity ratings about the in-party using the same numbering scheme as above
+\texttt{InPartyIdentity\_avg}  | Average identity ratings about the in-party
+\texttt{OutPartyIdentity\_(1-4)}  | Identity ratings about the out-party using the same numbering scheme as above
+\texttt{OutPartyAffect\_avg}  | Average identity ratings about the out-party
+\texttt{AffectDiff\_(1-4)}  | Difference in affective feelings between in-party and out-party using the same numbering scheme as above
+\texttt{AffectDiff\_avg}  | Average difference in affective feelings between in-party and out-party
+\texttt{IdentityDiff\_(1-4)}  | Difference in identity ratings between in-party and out-party using the same numbering scheme as above
+\texttt{IdentityDiff\_avg}  | Average difference in identity ratings between in-party and out-party
+
+
+```{r}
+# load the data,
+ClassExperiment <- read_csv('Oct28ClassData.csv')
+```
+
+
+## Question 4 
+### Part a 
+**For at least one of the individual affect items, the in-party and out-party affect averages, and the average affect difference, report average values for the treatment and control groups, an estimate of the difference between those groups, and the results of a test for statistical significance. Did imagined social contact change your classmates' affect toward members of the opposing party? Their own party? What about their affective polarization?**
+
+```{r}
+# Means
+ClassExperiment_mean <- ClassExperiment %>% 
+  drop_na(OutPartyAffect_avg) %>% 
+  group_by(Treated) %>% 
+  summarize(avgRepublicanAffect_1 = mean(RepublicanAffect_1),
+            avgDemocraticAffect_1 = mean(DemocraticAffect_1),
+            avgInPartyAffect_avg = mean(InPartyAffect_avg),
+            avgOutPartyAffect_avg = mean(OutPartyAffect_avg),
+            avgAffectDiff_avg = mean(AffectDiff_avg),
+            .groups = "drop")
+
+ClassExperiment_mean
+
+# Difference
+ClassExperiment_diff <- ClassExperiment_mean %>% 
+  pivot_longer(avgRepublicanAffect_1:avgAffectDiff_avg, names_to = "Measurement", values_to = "Measure") %>% 
+  pivot_wider(names_from = Treated, values_from = Measure) %>% 
+  rename(
+    treated = `TRUE`,
+    control = `FALSE`
+  ) %>% 
+  mutate(Difference = treated - control)
+
+ClassExperiment_diff %>% 
+  gt() %>% 
+  tab_header(title = "Estimated Difference between treatment and control",
+             subtitle = "in our class dataset") %>%
+  fmt_number(
+    columns = 2:4,
+    decimals = 3
+  )
+
+# T-Test
+t.test(RepublicanAffect_1 ~ Treated, ClassExperiment)
+t.test(DemocraticAffect_1 ~ Treated, ClassExperiment)
+t.test(InPartyAffect_avg ~ Treated, ClassExperiment)
+t.test(OutPartyAffect_avg ~ Treated, ClassExperiment)
+t.test(AffectDiff_avg ~ Treated, ClassExperiment)
+```
+
+In our class data, we can see the opposite effect as in the paper. When exposed to the treatment, respondents on average had a more negative view towards the out party rather than a more positive view towards them as in the paper. I hypothesize that this is due to cultural differences.
+
+### Part b
+**For at least one individual identity trait, the in-party and out-party identity averages, and the average identity difference, report mean values for the treatment and control groups, an estimate of the difference between those groups, and the results of a test for statistical significance. How do the experimental effects of imagined contact on identity traits compare to the effects on affect in the class sample?**
+
+```{r}
+# Means
+ClassExperiment_mean_2 <- ClassExperiment %>% 
+  drop_na(OutPartyAffect_avg) %>% 
+  group_by(Treated) %>% 
+  summarize(RepublicanIdentity_1_avg = mean(RepublicanIdentity_1),
+            DemocraticIdentity_1_avg = mean(DemocraticIdentity_1),
+            InPartyIdentity_avg_avg = mean(InPartyIdentity_avg),
+            OutPartyAffect_avg_avg = mean(OutPartyAffect_avg),
+            IdentityDiff_avg_avg = mean(IdentityDiff_avg),
+            .groups = "drop")
+
+ClassExperiment_mean_2
+
+# Difference
+ClassExperiment_diff <- ClassExperiment_mean_2 %>% 
+  pivot_longer(RepublicanIdentity_1_avg:IdentityDiff_avg_avg, names_to = "Measurement", values_to = "Measure") %>% 
+  pivot_wider(names_from = Treated, values_from = Measure) %>% 
+  rename(
+    treated = `TRUE`,
+    control = `FALSE`
+  ) %>% 
+  mutate(Difference = treated - control)
+
+ClassExperiment_diff
+
+# T-Test
+t.test(RepublicanIdentity_1 ~ Treated, ClassExperiment)
+t.test(DemocraticIdentity_1 ~ Treated, ClassExperiment)
+t.test(InPartyIdentity_avg ~ Treated, ClassExperiment)
+t.test(OutPartyAffect_avg ~ Treated, ClassExperiment)
+t.test(IdentityDiff_avg ~ Treated, ClassExperiment)
+```
+
+```{r}
+# t-test
+RepublicanPosdiff <- difference_in_means(RepublicanAffect_1 ~ Treated, data = ClassExperiment)
+RepublicanWarmdiff <- difference_in_means(RepublicanAffect_2 ~ Treated, data = ClassExperiment)
+RepublicanAdmirediff <- difference_in_means(RepublicanAffect_3 ~ Treated, data = ClassExperiment)
+RepublicanRespectdiff <- difference_in_means(RepublicanAffect_4 ~ Treated, data = ClassExperiment)
+
+# Outcomes
+treatment_effect_plot_data <- tibble(
+  outcomes = c("Republican Positive Rating", "Republican Warm Rating", 
+               "Republican Admiration Rating", "Republican Respect Rating"),
+  pointests = c(RepublicanPosdiff$coefficients, RepublicanWarmdiff$coefficients,
+                RepublicanAdmirediff$coefficients, RepublicanRespectdiff$coefficients),
+  lowbounds = c(RepublicanPosdiff$conf.low, RepublicanWarmdiff$conf.low,
+                RepublicanAdmirediff$conf.low, RepublicanRespectdiff$conf.low),
+  upbounds = c(RepublicanPosdiff$conf.high, RepublicanWarmdiff$conf.high,
+                RepublicanAdmirediff$conf.high, RepublicanRespectdiff$conf.high),
+)
+
+# Make the plot
+republican_treatment_effect_plot <- treatment_effect_plot_data %>% 
+  ggplot(aes(x = factor(outcomes, levels = outcomes), y = pointests, ymin = lowbounds, ymax = upbounds)) + 
+  geom_pointrange() + 
+  geom_hline(yintercept = 0, linetype = 'dashed') + 
+  coord_flip() + 
+  labs(
+    title = "Effect of Treatment on Affect Toward Republicans",
+    x = "Experimental Outcomes",
+    y = "Treatment Effect (with 95% CI)"
+  ) +
+  theme_light()
+
+republican_treatment_effect_plot
+
+# png("republican_treatment_effect_plot.png", units="in", width=8, height=5, res=300)
+# print(republican_treatment_effect_plot)
+# dev.off()
+```
+
+```{r}
+RepublicanAffect_plot <- ClassExperiment %>% 
+  select(Treated, RepublicanAffect_1:RepublicanAffect_4) %>% 
+  pivot_longer(RepublicanAffect_1:RepublicanAffect_4, names_to = "Affect", values_to = "Rating") %>% 
+  drop_na(Rating) %>% 
+  mutate(Treated = case_when(
+    Treated == TRUE ~ "treatment",
+    TRUE ~ "control"
+  ),
+  Affect = case_when(
+    Affect == "RepublicanAffect_1" ~ "RepublicanPos",
+    Affect == "RepublicanAffect_2" ~ "RepublicanWarm",
+    Affect == "RepublicanAffect_3" ~ "RepublicanAdmire",
+    Affect == "RepublicanAffect_4" ~ "RepublicanRespect",
+  )) %>% 
+  group_by(Treated, Affect) %>% 
+  summarize(
+    Treated = Treated,
+    Affect = Affect,
+    Rating = Rating,
+    mean_rating = mean(mfv(Rating)),
+    .groups = "drop"
+  ) %>% 
+  ggplot(aes(x = Rating, fill = Treated)) +
+  geom_density(alpha = 0.3) +
+  geom_vline(aes(xintercept = mean_rating), linetype = "dashed") +
+  facet_wrap(~Affect) +
+  theme_light() +
+  labs(
+    title = "Most Common Affect Rating Averages",
+    subtitle = "Towards Republicans",
+    x = "Rating",
+    y = "Density",
+    fill = ""
+  )
+
+DemocraticAffect_plot <- ClassExperiment %>% 
+  select(Treated, DemocraticAffect_1:DemocraticAffect_4) %>% 
+  pivot_longer(DemocraticAffect_1:DemocraticAffect_4, names_to = "Affect", values_to = "Rating") %>% 
+  drop_na(Rating) %>% 
+  mutate(Treated = case_when(
+    Treated == TRUE ~ "treatment",
+    TRUE ~ "control"
+  ),
+  Affect = case_when(
+    Affect == "DemocraticAffect_1" ~ "DemocraticPos",
+    Affect == "DemocraticAffect_2" ~ "DemocraticWarm",
+    Affect == "DemocraticAffect_3" ~ "DemocraticAdmire",
+    Affect == "DemocraticAffect_4" ~ "DemocraticRespect",
+  )) %>% 
+  group_by(Treated, Affect) %>% 
+  summarize(
+    Treated = Treated,
+    Affect = Affect,
+    Rating = Rating,
+    mean_rating = mean(mfv(Rating)),
+    .groups = "drop"
+  ) %>% 
+  ggplot(aes(x = Rating, fill = Treated)) +
+  geom_density(alpha = 0.3) +
+  geom_vline(aes(xintercept = mean_rating), linetype = "dashed") +
+  facet_wrap(~Affect) +
+  theme_light() +
+  labs(
+    title = "Most Common Affect Rating Averages",
+    subtitle = "Towards Democrats",
+    x = "Rating",
+    y = "Density",
+    fill = ""
+  )
+
+RepDemAffect_grid <- plot_grid(RepublicanAffect_plot + 
+                                 theme(legend.position = "none"), 
+                               DemocraticAffect_plot + 
+                                 theme(legend.position = "none"))
+
+legend <- get_legend(RepublicanAffect_plot + 
+                       theme(legend.position = "bottom"))
+
+RepDemAffect_grid_legend <- plot_grid(RepDemAffect_grid, legend, ncol = 1, rel_heights = c(1, .1))
+
+RepDemAffect_grid_legend
+
+# png("RepDemAffect_grid.png", units="in", width=10, height=5, res=300)
+# print(RepDemAffect_grid_legend)
+# dev.off()
+```
+
+
+## Question 5 
+
+**Compare the results from the class experiment to the results from Wang et al. (2021). What do you hypothesize accounts for similarities or differences in the results?**
+
+Comparing these results with the ones from Wang et al. (2021), we find opposite results that one might expect to find. Chinese students reacted more positively towards Japanese people when exposed to the treatment while Harvard studnets reacted more negatively towards the out party when exposed to the treatment. I hypothesize that this diffrence is due to cultural differences in both countries.
+
+## Question 6: Data Science Question
+
+We have not yet asked you to use the free response data, which takes the form of unstructured text. With this question, we challenge you to find a creative way to use this data. **To structure your work, first suggest a hypothesis that could be investigated using the text data and the other data from the experiment. Second, implement a method to use the text data to test this hypothesis. Your method can involve automated or manual processing of the text.** You might consider using a function like \texttt{nchar} to characterize the length of response or a package like (\texttt{stm})[https://cran.r-project.org/web/packages/stm/index.html] to do more sophisticated content analysis.
+
+```{r}
+text_words <- ClassExperiment %>% 
+  mutate(id = row_number(),
+         TreatmentScenario_all = paste(`TreatmentScenario _1`, `TreatmentScenario _2`, `TreatmentScenario _3`)) %>% 
+  unnest_tokens(output = word, input = TreatmentScenario_all) 
+
+data(stop_words)
+
+text_words <- text_words %>%
+  anti_join(stop_words, by = "word")
+
+# Top 10 common words
+text_words %>% 
+  count(word, sort = TRUE) %>% 
+  filter(word != "na") %>% 
+  head(10)
+```
+
+
+## Question 7
+
+**Can you glean any additional insights by using the control variables included with the class experiment data? For example, are the results different if you subset to strong partisans or people born in the United States? Be creative.**
+
