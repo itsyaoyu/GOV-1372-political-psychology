@@ -1,0 +1,653 @@
+---
+title: 'Data Exploration: Emotional Arousal'
+author: "Yao Yu"
+date: "November 4, 2021"
+output:
+  pdf_document: default
+  html_document:
+    df_print: paged
+  word_document: default
+urlcolor: blue
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(estimatr)
+library(haven)
+library(stargazer)
+select <- dplyr::select
+library(gt)
+library(jtools)
+```
+
+
+In this Data Exploration assignment we will explore Clifford and Jerit's (2018) findings about the effects of disgust and anxiety on political learning. 
+
+If you have a question about any part of this assignment, please ask! Note that the actionable part of each question is **bolded**.
+
+# Emotional Arousal: Disgust and Anxiety
+**Data Details:**
+
+* File Name: \texttt{Study1ReplicationData.dta}
+
+* Source: These data are from Study 1 in Clifford and Jerit (2018).
+
+Variable Name         | Variable Description
+--------------------- | --------------------------------------
+\texttt{treat\_rand1}         | Treatment assignment: 1-Low Anxiety/Low Disgust, 2-High Anxiety/Low Disgust, 3-Low Anxiety/High Disgust, and 4-High Anxiety/High Disgust
+\texttt{Q11\_1}  | Self reported feeling of how well DISGUST describes respondent's emotional reaction to virus: 1-Not Well At All, 2- Not Too Well, 3-Somewhat Well, 4-Very Well, 5-Extremely Well, 8-Skipped
+\texttt{Q11\_2}  | Self reported feeling of how well GROSSED OUT describes respondent's emotional reaction to virus: 1-Not Well At All, 2- Not Too Well, 3-Somewhat Well, 4-Very Well, 5-Extremely Well, 8-Skipped
+\texttt{Q11\_3}  | Self reported feeling of how well REPULSED describes respondent's emotional reaction to virus: 1-Not Well At All, 2- Not Too Well, 3-Somewhat Well, 4-Very Well, 5-Extremely Well, 8-Skipped
+\texttt{Q11\_4}  | Self reported feeling of how well AFRAID describes respondent's emotional reaction to virus: 1-Not Well At All, 2- Not Too Well, 3-Somewhat Well, 4-Very Well, 5-Extremely Well, 8-Skipped
+\texttt{Q11\_5}  | Self reported feeling of how well ANXIOUS describes respondent's emotional reaction to virus: 1-Not Well At All, 2- Not Too Well, 3-Somewhat Well, 4-Very Well, 5-Extremely Well, 8-Skipped
+\texttt{Q11\_6}  | Self reported feeling of how well WORRIED describes respondent's emotional reaction to virus: 1-Not Well At All, 2- Not Too Well, 3-Somewhat Well, 4-Very Well, 5-Extremely Well, 8-Skipped
+\texttt{Q12\_1}  | Identification of FATIGUE as a symptom: 1-Yes, 2- No
+\texttt{Q12\_2}  | Identification of HEADACHES as a symptom: 1-Yes, 2- No
+\texttt{Q12\_3}  | Identification of DIARRHEA as a symptom: 1-Yes, 2- No
+\texttt{Q12\_4}  | Identification of JOINT PAIN as a symptom: 1-Yes, 2- No
+\texttt{Q12\_5}  | Identification of BOILS as a symptom: 1-Yes, 2- No
+\texttt{Q12\_6}  | Identification of WARTS as a symptom: 1-Yes, 2- No
+\texttt{Q12\_7}  | Identification of FEVER as a symptom: 1-Yes, 2- No
+\texttt{Q13}  | Identification of method of disease transmission: 1-Person to Person Contact, 2- The air, 3- Animals, 4-Insects, 5-Food, 8-Skipped
+\texttt{Q14}  | Identification of there being a cure for the virus: 1-Yes, 2-No, 8-Skipped
+\texttt{Q15}  | Requested additional information be sent to them: 1-Yes, 2-No, 8-Skipped
+\texttt{Q16\_1}  | Topic of requested information AFFECTED COUNTRIES: 1-Yes, 2-No, 9-Not Asked
+\texttt{Q16\_2}  | Topic of requested information TRV IN US: 1-Yes, 2-No, 9-Not Asked
+\texttt{Q16\_3}  | Topic of requested information TRV TRANSMISSION: 1-Yes, 2-No, 9-Not Asked
+\texttt{Q16\_4}  | Topic of requested information AT RISK POPULATION: 1-Yes, 2-No, 9-Not Asked
+\texttt{Q16\_5}  | Topic of requested information DEATH TOLL: 1-Yes, 2-No, 9-Not Asked
+\texttt{Q16\_6}  | Topic of requested information PROGRESS ON CURE: 1-Yes, 2-No, 9-Not Asked
+\texttt{Q16\_7}  | Topic of requested information SYMPTOMS: 1-Yes, 2-No, 9-Not Asked
+\texttt{Q17\_6}  | Self-reported likelihood of looking up more info: 1-Not likely at all, 2-Not too likely, 3-Somewhat likely, 4-Very likely, 5-Extremely likely, 8-Skipped
+\texttt{Q17\_7}  | Self-reported likelihood of talking with friends or family about disease in next week: 1-Not likely at all, 2-Not too likely, 3-Somewhat likely, 4-Very likely, 5-Extremely likely, 8-Skipped
+\texttt{page\_article\_timing}  | Time spent in seconds on page containing article about disease
+\texttt{Q18}  | Self-reported gender: 1-Female, 0-Not Female
+\texttt{Q19}  | Self-reported race/ethnicity: 1-White, 2-Black, 3-Hispanic, 4-Asian, 5-Native American, 6-Mixed Race, 7-Other
+\texttt{Q20}  | Self-reported education: 1-No HS, 2-High school graduate, 3-Some college, 4-2 year degree, 5-4 year degree, 6-Post-graduate degree
+\texttt{Q21}  | Self-reported partisanship: 1-Strong Democrat, 2-Not very strong Democrat, 3-Lean Democrat, 4-Independent, 5-Lean Republican, 6-Not very strong Republican, 7- Strong Republican, 8-Not Sure
+\texttt{Q22}  | Self-reported voter registration status: 1-Yes, 2-No, 3-Don't know
+\texttt{Q23}  | Self-reported ideology: 1-Very Liberal, 2-Liberal, 3-Moderate, 4-Conservative, 5-Very Conservative
+
+
+
+```{r}
+#Load the data for Study 1
+Study1_preprocess <- read_dta("Study1ReplicationData.dta")
+```
+To date you have read in data from both .csv and .RData files. The data for this week are stored in another common file type, .dta files. This is the format for data exported using Stata, the other most commonly used statistical software package besides R. Reading these files requires the read_dta() function in the haven package, so be sure to install it if you have not already!
+
+\newpage
+
+## Question 1 DO NOT SKIP
+
+Cleaning and organizing data is an important part of any research process. Note: Your blog posts should not address the data cleaning portion of the assignment but rather the content of the material
+
+### Part a 
+
+The data is not currently in the most usable condition. As currently read in, many of the dataset's variables are somewhat unhelpfully labelled with just the survey question number. In order to make them more intuitive to work with we can rename them easily using the dplyr package. Here we will make use of the rename_with() function. The .cols argument in the rename_with() function specifies which columns should be renamed, which takes either the original name of the variable, the index, or a logical argument. We will explore each of these methods beginning with renaming variables by name. **Modify the code below to rename variables Q13, Q14, and Q15. Make sure the list of replacement variable names has the same number as the number of variables you're renaming. Also be sure to save the modified dataset as a new object to continue working with it.** 
+
+```{r, error=TRUE}
+#Method 1: Renaming by name
+Study1_processing1 <- Study1_preprocess %>% 
+  rename_with(.cols = c(Q13, Q14, Q15), ~c("transmissionMethod", "cure", "requestInfo"))
+```
+
+### Part b
+
+Many other variables are also unhelpfully labelled. For example the last six variables in the data are demographic characteristics (gender, race, education, party id, voter registration status, and ideology). You can also rename variables by position using the following code.   **Modify the code below to rename the demographic variables. Make sure the list of replacement variable names has the same number as the number of variables you're renaming. Also be sure to save the modified dataset as a new object to continue working with it.** 
+
+```{r, error=TRUE}
+#Method 2: Renaming by index/position
+#last_col() is just a function that returns the index number of the last
+#variable in the dataset (33 in this one), and the offset subtracts that number
+#from it (33-5=28)
+Study1_processing2 <- Study1_processing1 %>% 
+  rename_with(.cols = last_col(offset = 5):last_col(), 
+              ~c("gender", "race", "educ", 
+                 "pid", "voterRegistration", "ideo"))
+```
+
+### Part c
+
+We can also rename all variables that satisfy a logical condition. Note that every variable relating to emotional reaction of the respondent is labelled as a part of question 11 (Q11). **Modify the code below to rename the demographic variables. Make sure the list of replacement variable names has the same number as the number of variables you're renaming. Also be sure to save the modified dataset as a new object to continue working with it.** 
+
+```{r, error=TRUE}
+#Method 3: Renaming by logical condition
+Study1_processing3 <- Study1_processing2 %>% 
+  rename_with(.cols = contains("Q11"), 
+              ~c("disgust", "grossedOut", "repulsed", "afraid", "anxious", "worried"))
+```
+
+### Part d
+
+We may not need all the variables in the dataset. For instance, the analysis below will not rely on knowing what topic of additional information people were interested in (Q16\_1 through Q16\_7). **The code below will search for a string in the variable labels and return only the variables that DO NOT include that string. Modify the code and use it to drop the unneeded variables from the dataset. Be sure to save the modified dataset as a new object to continue working with it.**
+
+```{r, error=TRUE}
+Study1_processing4 <- Study1_processing3 %>% 
+  select(-contains("Q16"))
+```
+
+### Part e
+
+Another issue often encountered is that the way missing data is coded can vary across data sources. Here responses are marked with the value of 8 for the respondent skipping the question. The functions mutate() and across() used in tandem are useful for recoding many variables at once in the same manner. across() specifies which columns to mutate and what function to apply to them all, in this case we'll want to use the function na_if() which recodes a variable as NA if it matches the second argument. **Modify the code below to change the relevant data columns to be binary variables with NA for missing data. Hint: For this dataset all values of 8 indicate a kind of missing data.**
+
+```{r, error=TRUE}
+Study1_processing5 <- Study1_processing4 %>% 
+  mutate(across(.cols = c("transmissionMethod", "cure", "requestInfo", 
+                          "pid", "Q17_6", "Q17_7"), ~na_if(., 8)))
+```
+
+
+### Part f
+
+Some of the binary data are also coded with 1s and 2s as opposed to 0s and 1s. These include the identification of symptoms, the request for additional information, identification that there is a cure, and voter registration status. **Use the mutate function to recode those variables to be binary with 1 for yes and 0 for no. Hint: You can look at the solutions for previous data exercises but you'll want to combine the mutate() and ifelse() functions.** 
+
+```{r}
+Study1_processing6 <- Study1_processing5 %>% 
+  mutate(across(.cols = c(contains("Q12"), "cure", "requestInfo", "voterRegistration"), 
+                ~ifelse(. == 2, 0, .)))
+```
+
+
+### Part g
+
+Lastly we may be interested not just in individual symptom recall but also whether or not the respondent correctly remembered all the symptoms in their treatment with no mistakes. **Use the mutate() function to add a variable capturing whether or not the respondent correctly identified the symptoms in their treatment. Remember that which set of symptoms are correct differs somewhat by treatment! Warning: This one may be a bit tricky, no worries if you don't quite get it. Feel free to skip to the next question.** 
+
+```{r}
+Study1_processing7 <- Study1_processing6 %>% 
+  mutate(symptomRecall = case_when(
+    Q12_1 == 0 ~ FALSE,
+    Q12_6 == 1 ~ FALSE,
+    Q12_7 == 1 ~ FALSE,
+    treat_rand1 %in% c(1, 2) & 
+      Q12_2 == 1 & 
+      Q12_3 == 0 & 
+      Q12_4 == 1 &
+      Q12_5 == 0 ~ TRUE,
+    treat_rand1 %in% c(3, 4) & 
+      Q12_2 == 0 & 
+      Q12_3 == 1 & 
+      Q12_4 == 0 &
+      Q12_5 == 1 ~ TRUE,
+    TRUE ~ FALSE
+  ),
+  treat_rand1 = as.factor(treat_rand1),
+  id = row_number()) %>% 
+  group_by(id) %>% 
+  mutate(avg_disgust = mean(disgust, grossedOut, repulsed),
+         avg_anxiety = mean(afraid, anxious, worried)) %>% 
+  ungroup() %>% 
+  select(-id)
+```
+
+### Part h
+
+Use the tools above to alter the data in whatever way you see fit. Some examples could be renaming remaining variables, creating new binary variables that identify if respondents are part of a certain racial or ethnic group (these would be necessary for including race in a regression for example), or any other transformation of the data. **Use the tools above or any others to modify the data to more useful for the following exercises in any way you see fit. Save this final version as the object you'll use for future questions.**
+
+```{r}
+emotions_clean <- Study1_processing7 %>% 
+  rename(identifyFatigue = Q12_1,
+         identifyHeadaches = Q12_2,
+         identifyDiarrhea = Q12_3,
+         identifyJointPain = Q12_4,
+         identifyBoils = Q12_5,
+         identifyWarts = Q12_6,
+         identifyFever = Q12_7,
+         infoLookup = Q17_6,
+         discussDisease = Q17_7) %>% 
+  mutate(
+    treated_anxiety = ifelse(treat_rand1 %in% c(2, 4), TRUE, FALSE),
+    treated_disgust = ifelse(treat_rand1 %in% c(3, 4), TRUE, FALSE)
+  )
+```
+
+\newpage
+
+## Question 2
+
+### Part a
+
+What are the treatments in Study 1? **How many treatment conditions are there in Study 1? What are they? How many respondents were in each condition? Hint: Look at page 269 for the treatment conditions of Study 1**
+
+```{r}
+emotions_clean %>% 
+  count(treat_rand1)
+```
+
+There were four treatment conditions in Study 1: Low Anxiety and Low Disgust, High Anxiety and Low Disgust, Low Anxiety and High Disgust, and High Anxiety and High Disgust. In each of these condition there were anywhere from 225 to 266 people. 
+
+### Part b
+
+The paper lays out three distinct hypotheses concerning the impact of disgust on information uptake and search. **What are the three hypotheses? Which outcome variables in Study 1 speak to which of these hypotheses? Hint: Look at pages 267 and 268 for the hypotheses**
+
+The three hypotheses are as follows:
+
+1. An object that induces disgust should increase retention of information related to the source of the emotion.
+
+2. While disgust may improve memory of the source of emotional arousal, it will impair recall of information that is not the primary elicitor of disgust.
+
+3. A person who feels disgusted about a threat will avoid the source of disgust and new information about the topic.
+
+Some outcome variables that speak to these hypotheses are `treat_rand1`, `treated_disgust`, `treated_anxiety` `symptomRecall`, `transmissionMethod`, `cure`, `requestInfo`, and `infoLookup`.
+
+\newpage
+
+## Question 3
+
+### Part a
+
+Often times when running an experiment a researcher will include a 'manipulation check' to confirm that the treatment was noticed and is having some of its intended effect. In this study they ask about the emotional response to the fictitious virus using two three item emotional indices: anxiety (afraid, anxious, worried) and disgust (disgusted, grossed out, repulsed). Take the average of the responses for each emotional index and check to see if the treatments had the desired manipulation. **Compare the average anxiety and disgust responses for each of the four treatments. Are there statistically significant differences in the way one would expect?**
+
+```{r}
+emotions_clean %>% 
+  group_by(treat_rand1) %>% 
+  summarize(
+    mean_afraid = mean(afraid),
+    mean_anxious = mean(anxious),
+    mean_worried = mean(worried),
+    mean_disgust = mean(disgust), 
+    mean_grossedOut = mean(grossedOut), 
+    mean_repulsed = mean(repulsed)
+  )
+```
+
+We can see that there is a clear difference between treatment groups [1, 2] and groups [3, 4] on emotional indices for disgust. However, there is not a clear difference between treatment groups [1, 3] and groups [2, 4] for anxiety. This suggests that anxiety might be have as clear effects due to the minimal difference among the treatment and control groups.
+
+### Part b
+
+Choose one of the three hypotheses identified in Question 2. Compare the responses on one or more of the outcomes relevant to that hypothesis. Is the hypothesis supported by the data? **For one or more outcome variables relevant to one of the three hypotheses check for statistically significant differences. What can we conclude from the data?**
+
+```{r, results='asis'}
+fit_1 <- lm(symptomRecall ~ treated_disgust, data = emotions_clean)
+fit_2 <- lm(identifyFatigue ~ treated_disgust, data = emotions_clean)
+fit_3 <- lm(identifyHeadaches ~ treated_disgust, data = emotions_clean)
+fit_4 <- lm(identifyJointPain ~ treated_disgust, data = emotions_clean)
+
+stargazer(fit_1, fit_2, fit_3, fit_4, header = FALSE,
+          dep.var.labels = c("Symptom Recall", "Identify Fatigue", 
+                             "Identify Headaches", "Identify Joint Pain"),
+          covariate.labels = c("Treatment Disgust", "Constant"),
+          title = "Low Disgust Identifications as a Function of Treatment Disgust")
+
+fit_5 <- lm(identifyDiarrhea ~ treated_disgust, data = emotions_clean)
+fit_6 <- lm(identifyBoils ~ treated_disgust, data = emotions_clean)
+fit_7 <- lm(identifyWarts ~ treated_disgust, data = emotions_clean)
+fit_8 <- lm(identifyFever ~ treated_disgust, data = emotions_clean)
+
+stargazer(fit_5, fit_6, fit_7, fit_8, header = FALSE,
+          dep.var.labels = c("Identify Diarrhea", "Identify Boils", 
+                             "Identify Warts", "Identify Fever"),
+          covariate.labels = c("Treatment Disgust", "Constant"),
+          title = "High Disgust Identifications as a Function of Treatment Disgust")
+```
+
+From the models, we can see that the disgust treatment confirms the first hypothesis that an object that induces disgust should increase retention of information related to the source of the emotion. For each symptom recall, we can see that the treatment on average increases the recall for high disgust symptoms of diarrhea and boils and on average decreases the recall for low disgust symptoms of headaches and joint point compared to the low disgust treatment. These results do not hold for the placebo symptoms of warts and fever and are statistically significant.
+
+\newpage
+
+## Question 4: DATA SCIENCE QUESTION
+
+### Part a
+
+As we have spoken about in class, using indexes of multiple measures aimed at a single concept is often more reliable than using only one measure. However how is one to know that all the measures in the index are related to the same concept? Cronbach's alpha is a measure of how internally consistent the answers to multiple questions are. It is given by the formula: 
+$$ \alpha = \frac{N\times\sum c}{\sum v + (N-1)\times\sum c} $$
+Where $N$ is the number of items in the index, $\sum c$ is the sum of the covariances for item pairs, and $\sum v$ is the sum of the variance for the items. **Using the formula calculate Cronbach's alpha for the disgust index and the anxiety indexes used in the paper.** 
+
+```{r}
+# n
+n <- 3
+
+# Disgust
+disgust_cov <- sum(cov(emotions_clean$disgust, emotions_clean$grossedOut), 
+                   cov(emotions_clean$disgust, emotions_clean$repulsed), 
+                   cov(emotions_clean$grossedOut, emotions_clean$repulsed))
+
+disgust_var <- sum(var(emotions_clean$disgust), 
+                   var(emotions_clean$grossedOut), 
+                   var(emotions_clean$repulsed))
+
+cronbach_alpha_disgust <- (n * disgust_cov) / 
+  (disgust_var + (n-1) * disgust_cov)
+
+cronbach_alpha_disgust
+
+# Anxiety
+anxious_cov <- sum(cov(emotions_clean$afraid, emotions_clean$anxious), 
+                   cov(emotions_clean$afraid, emotions_clean$worried), 
+                   cov(emotions_clean$anxious, emotions_clean$worried))
+
+anxious_var <- sum(var(emotions_clean$afraid), 
+                   var(emotions_clean$anxious), 
+                   var(emotions_clean$worried))
+
+cronbach_alpha_anxious <- (n * anxious_cov) / 
+  (anxious_var + (n-1) * anxious_cov)
+
+cronbach_alpha_anxious
+```
+
+
+### Part b
+
+In R, one can use the function cronbach.alpha() from the ltm package. Generally scales or indices with a Cronbach's alpha below 0.7 are considered insufficiently internally consistent for use. **Calculate Cronbach's alpha for the disgust index and the anxiety indexes using the function in R. Does this match your previous calculation? Are each of the scales sufficiently internally consistent?**
+
+```{r, error=TRUE}
+# install.packages("ltm")
+library(ltm)
+
+cronbach.alpha(emotions_clean %>% select(disgust, grossedOut, repulsed))
+cronbach.alpha(emotions_clean %>% select(afraid, anxious, worried))
+```
+
+Yes! It matches and the scales are sufficiently internally consistent as the alpha value is above 0.7 for both indexes.
+
+### Part c
+
+Create a multivariate regression model for an outcome variable of your choosing. Carefully interpret the results. **Create a multivariate linear regression model for any outcome of your choosing with any covariates of your choice. Justify your choice of models and what the result may indicate. Carefully interpret the coefficients for the model.**
+
+```{r, results='asis'}
+fit <- lm(requestInfo ~ treat_rand1 + avg_disgust + avg_anxiety + gender + educ + pid, 
+            data = emotions_clean)
+
+stargazer(fit, header = FALSE,
+          dep.var.labels = c("Request Information"),
+          covariate.labels = c("High Anxiety and Low Disgust", 
+                               "Low Anxiety and High Disgust",
+                               "High Anxiety and High Disgust",
+                               "Average Disgust", "Average Afraid", "Gender", 
+                               "Education", "Party ID", "Constant"),
+          title = "Request Information as a Function of Treatment and others")
+```
+
+
+### Part d
+
+You can create coefficient plots using regression coefficients as well. Use the results of part c to create a plot of the coefficients in your regression model. **Create a plot of the regression coefficients with their 95\% confidence intervals. Be sure to include a line demarcating 0. Hint: the confint() function can take a regression object and return the upper and lower bounds of the confidence intervals.**
+
+```{r}
+coef_plot <- plot_summs(fit, scale = TRUE, plot.distributions = TRUE,
+           model.names = c("Model 3"),
+           coefs = c("Party ID" = "pid",
+                     "Education" = "educ",
+                     "Gender" = "gender",
+                     "Average Afraid" = "afraid",
+                     "Average Disgust" = "disgust",
+                     "High Anxiety and Low Disgust" = "treat_rand12",
+                     "Low Anxiety and High Disgust" = "treat_rand13",
+                     "High Anxiety and High Disgust" = "treat_rand14")) +
+  labs(title = "Coefficient Plot")
+
+coef_plot
+
+# png("emotions_coef_plot.png", units="in", width=8, height=5, res=300)
+# print(coef_plot)
+# dev.off()
+```
+
+\newpage
+
+# Emotional Arousal: Disgust
+**Data Details:**
+
+* File Name: \texttt{Study2ReplicationData.dta}
+
+* Source: These data are from Study 2 in Clifford and Jerit (2018).
+
+Variable Name         | Variable Description
+--------------------- | --------------------------------------
+\texttt{treament}         | Treatment assignment: 1-Control, 2-Disgusting Imagery/No Map, 3-Map/No Disgusting Imagery, and 4-Disgusting Imagery and Map
+\texttt{page\_time}  | Time spent viewing page with treatment article
+\texttt{symptpercent}  | Belief about percentage of people who contract Dengue Fever but never experience symptoms: 1-0\%, 2-20\%, 3-40\%, 4-60\%, 5-80\%
+\texttt{Mexico}  | Identify MEXICO to be at risk for spread of Dengue: 0-No, 1-Yes
+\texttt{SouthAmerica}  | Identify SOUTH AMERICA to be at risk for spread of Dengue: 0-No, 1-Yes
+\texttt{Africa}  | Identify AFRICA to be at risk for spread of Dengue: 0-No, 1-Yes
+\texttt{Canada}  | Identify CANADA to be at risk for spread of Dengue: 0-No, 1-Yes
+\texttt{Russia}  | Identify RUSSIA to be at risk for spread of Dengue: 0-No, 1-Yes
+\texttt{Europe}  | Identify EUROPE to be at risk for spread of Dengue: 0-No, 1-Yes
+\texttt{length}  | Belief about how long symptoms of Dengue Fever typically last: 1-A few days, 2-A week, 3-Two to three weeks, 4-A month or more
+\texttt{fever}  | Identification of FEVER as a symptom: 0-No, 1-Yes
+\texttt{headache}  | Identification of HEADACHE as a symptom: 0-No, 1-Yes
+\texttt{jointpain}  | Identification of JOINT PAIN as a symptom: 0-No, 1-Yes
+\texttt{rash}  | Identification of RASH as a symptom: 0-No, 1-Yes
+\texttt{bleeding}  | Identification of BLEEDING FROM EYES, NOSE, AND GUMS as a symptom: 0-No, 1-Yes
+\texttt{nausea}  | Identification of NAUSEA as a symptom: 0-No, 1-Yes
+\texttt{seizures}  | Identification of SEIZURES as a symptom: 0-No, 1-Yes
+\texttt{breathing}  | Identification of DIFFICULTY BREATHING as a symptom: 0-No, 1-Yes
+\texttt{infosearch}  | Self-reported likelihood of looking up more info: 1-Not likely at all, 2-Not too likely, 3-Somewhat likely, 4-Very likely, 5-Extremely likely
+\texttt{talk}  | Self-reported likelihood of talking with friends or family about disease in next week: 1-Not likely at all, 2-Not too likely, 3-Somewhat likely, 4-Very likely, 5-Extremely likely
+\texttt{infosession}  | Request invitation to information session about Dengue Fever: 0-No, 1-Yes
+\texttt{learn}  | Request additional info about Dengue Fever in survey: 0-No, 1-Yes
+\texttt{infogiveemail}  | Provided email address to receive invitation to info session: 0-No, 1-Yes
+\texttt{E\_disgust}  | Self reported feeling of how well DISGUSTED describes respondent's emotional reaction to disease: 1-Not Well At All, 2- Not Too Well, 3-Somewhat Well, 4-Very Well, 5-Extremely Well
+\texttt{E\_gross}  | Self reported feeling of how well GROSSED OUT describes respondent's emotional reaction to disease: 1-Not Well At All, 2- Not Too Well, 3-Somewhat Well, 4-Very Well, 5-Extremely Well
+\texttt{E\_resentment}  | Self reported feeling of how well RESENTFUL describes respondent's emotional reaction to disease: 1-Not Well At All, 2- Not Too Well, 3-Somewhat Well, 4-Very Well, 5-Extremely Well
+\texttt{E\_revulsion}  | Self reported feeling of how well REVULSION describes respondent's emotional reaction to disease: 1-Not Well At All, 2- Not Too Well, 3-Somewhat Well, 4-Very Well, 5-Extremely Well
+\texttt{E\_hateful}  | Self reported feeling of how well HATEFUL describes respondent's emotional reaction to disease: 1-Not Well At All, 2- Not Too Well, 3-Somewhat Well, 4-Very Well, 5-Extremely Well
+\texttt{E\_angry}  | Self reported feeling of how well ANGRY describes respondent's emotional reaction to disease: 1-Not Well At All, 2- Not Too Well, 3-Somewhat Well, 4-Very Well, 5-Extremely Well
+\texttt{E\_anxiety}  | Self reported feeling of how well ANXIETY describes respondent's emotional reaction to disease: 1-Not Well At All, 2- Not Too Well, 3-Somewhat Well, 4-Very Well, 5-Extremely Well
+\texttt{E\_nervous}  | Self reported feeling of how well NERVOUS describes respondent's emotional reaction to disease: 1-Not Well At All, 2- Not Too Well, 3-Somewhat Well, 4-Very Well, 5-Extremely Well
+\texttt{E\_worry}  | Self reported feeling of how well WORRIED describes respondent's emotional reaction to disease: 1-Not Well At All, 2- Not Too Well, 3-Somewhat Well, 4-Very Well, 5-Extremely Well
+
+```{r}
+Study2_preprocess <- read_dta("Study2ReplicationData.dta")
+
+Study2 <- Study2_preprocess %>%
+  #grouping similar treatment conditions and computing time spent viewing treatment
+  mutate(treatment = case_when(c_control==1 ~ 1, 
+                               c_bothd==1|c_bothm==1 ~ 4, 
+                               c_disguste==1|c_disgustl==1 ~ 2, 
+                               c_mapl==1|c_mape==1 ~3),
+         page_time = rowMeans(select(., contains("t_c")), na.rm = TRUE)) %>% 
+  #recoding NAs as 0 for country and symptom variables
+  mutate(across(contains(c("countries","symptoms")), ~ifelse(is.na(.x),0,.x))) %>%
+  #recoding infosession as binary
+  mutate(across(c(infosession,learn), ~ifelse(.x==1,1,0))) %>% 
+  #renaming country variables
+  rename_with(.cols= contains("countries"), ~c("Mexico", 
+                                               "SouthAmerica", 
+                                               "Africa", 
+                                               "Canada", 
+                                               "Russia", 
+                                               "Europe")) %>% 
+  #renaming symptom variables
+  rename_with(.cols = contains("ksymptoms"), ~c("fever", 
+                                                "headache", 
+                                                "jointpain", 
+                                                "rash", 
+                                                "bleeding", 
+                                                "nausea", 
+                                                "seizures", 
+                                                "breathing")) %>%
+  #renaming info search variables and other disease knowledge info
+  rename_with(.cols = contains("search"), ~c("infosearch", 
+                                             "talk")) %>% 
+  rename(symptpercent = kpercent, length = klength) %>% 
+  #renaming emotion variables
+  rename_with(.cols = contains("emotion"), ~paste0("E_", c("disgust", 
+                                                           "gross", 
+                                                           "resentment", 
+                                                           "revulsion", 
+                                                           "hateful", 
+                                                           "angry", 
+                                                           "anxiety", 
+                                                           "nervous", 
+                                                           "worry"))) %>% 
+  #creating indicator variable for correct identification of symptoms and at risk countries 
+  mutate(country_correct = as.numeric(paste0(Mexico, SouthAmerica, Africa, Canada, Russia, Europe))==111000,
+         symptoms_correct = as.numeric(paste0(fever, headache, jointpain, rash, bleeding, nausea, seizures, breathing)==11111000)) %>%
+  #deleting irrelevant variables
+  select(-contains("c_")) %>%
+  #reordering treatment as first variable
+  relocate(treatment)
+```
+
+\newpage
+
+## Question 5
+
+Above is an example of the kind of data cleaning that sometimes must be done to make the datasets intuitive and easy to work with. **Look through the code above and try to follow what each line is doing. Look at the Study1\_preprocess and Study1 datasets and note the differences between them. You do not need to write anything for this question, just get a sense of some of the useful tools when cleaning data!**
+
+## Question 6
+
+### Part a
+
+What are the treatment conditions for Study 2? **What are the treatment conditions for Study 2? How do they differ from Study 1? Hint: Look at page 273 for the treatment conditions of Study 2**
+
+The treatment conditions for Study 2 were based off the idea that the climate in Houston is ideal for the spread of dengue, how the disease can spread unnoticed, and that there is currently no vaccine. Building off the findings of study 1 and the fact that the sample was small, the researchers kept a high level of threat across conditions instead of manipulating anxiety. The treatment conditions are as follows:
+
+1. Control
+2. 3 disgusting images and no map
+3. no 3 disgusting images and map
+4. 3 disgusting images and map
+
+### Part b
+
+Study 2 asks about three different categories of emotions: disgust (disgusted, grossed out, revulsion), anxiety (anxious, nervous, worried), and anger (angry, hateful, resentful). Did the treatments succeed in manipulating emotions? Was the impact limited to disgust? **Pool respondents into low disgust and high disgust treatments. Check for statistically significant differences in the average answer to each emotion index.**
+
+```{r}
+Study2_clean <- Study2 %>% 
+  mutate(treatment_disgust = case_when(
+    treatment %in% c(2, 4) ~ TRUE,
+    TRUE ~ FALSE
+  ),
+  treatment_map = case_when(
+    treatment %in% c(3, 4) ~ TRUE,
+    TRUE ~ FALSE
+  ))
+
+# disgust
+difference_in_means(E_disgust ~ treatment_disgust, Study2_clean)
+difference_in_means(E_gross ~ treatment_disgust, Study2_clean)
+difference_in_means(E_revulsion ~ treatment_disgust, Study2_clean)
+
+# anxiety
+difference_in_means(E_anxiety ~ treatment_disgust, Study2_clean)
+difference_in_means(E_nervous ~ treatment_disgust, Study2_clean)
+difference_in_means(E_worry ~ treatment_disgust, Study2_clean)
+
+# anger
+difference_in_means(E_angry ~ treatment_disgust, Study2_clean)
+difference_in_means(E_hateful ~ treatment_disgust, Study2_clean)
+difference_in_means(E_resentment ~ treatment_disgust, Study2_clean)
+```
+
+
+### Part c
+
+Plot the distribution of disgust, anxiety, and anger for low disgust and high disgust treatment conditions. **Pool respondents into low disgust and high disgust treatments. Plot the distributions for the average item response to each of the three emotional categories.**
+
+```{r}
+Study2_clean %>% 
+  drop_na() %>% 
+  mutate(id = row_number()) %>% 
+  group_by(id) %>% 
+  mutate(avg_disgust = mean(E_disgust, E_gross, E_revulsion),
+         avg_anxiety = mean(E_anxiety, E_nervous, E_worry),
+         avg_anger = mean(E_angry, E_hateful, E_resentment)) %>% 
+  ungroup() %>% 
+  select(treatment_disgust, avg_disgust, avg_anxiety, avg_anger) %>% 
+  pivot_longer(avg_disgust:avg_anger, names_to = "feeling", values_to = "values") %>% 
+  ggplot(aes(x = values, fill = treatment_disgust)) +
+  geom_density(alpha = 0.3) +
+  facet_wrap(~feeling) +
+  theme_light()
+```
+
+\newpage
+
+## Question 7
+
+### Part a 
+
+The researchers tested whether the inclusion of any kind of imagery (the map) would affect informational recall. Does the map impact information recall about the info it shows (affected countries)? What about other information? **Compare the accuracy of affected country recall in map and non-map treatment conditions. Then choose one other measure information recall and compare it across map and non-map treatments.**
+
+```{r}
+# Real countries
+difference_in_means(Mexico ~ treatment_map, Study2_clean)
+difference_in_means(SouthAmerica ~ treatment_map, Study2_clean)
+difference_in_means(Africa ~ treatment_map, Study2_clean)
+
+# Control countries
+difference_in_means(Canada ~ treatment_map, Study2_clean)
+difference_in_means(Russia ~ treatment_map, Study2_clean)
+difference_in_means(Europe ~ treatment_map, Study2_clean)
+
+# Other measures (disgusting)
+difference_in_means(rash ~ treatment_map, Study2_clean)
+difference_in_means(bleeding ~ treatment_map, Study2_clean)
+
+# Other measures (not disgusting)
+difference_in_means(headache ~ treatment_map, Study2_clean)
+difference_in_means(fever ~ treatment_map, Study2_clean)
+difference_in_means(jointpain ~ treatment_map, Study2_clean)
+```
+
+No
+
+### Part b
+
+Choose one of the three hypotheses identified in Question 2. Compare the responses on one or more of the outcomes relevant to that hypothesis using data from Study 2. Is the hypothesis supported by the data? **For one or more outcome variables relevant to one of the three hypotheses check for statistically significant differences. What can we conclude from the data?**
+
+```{r, results='asis'}
+fit_1 <- lm(headache ~ treatment_disgust, data = Study2_clean)
+fit_2 <- lm(fever ~ treatment_disgust, data = Study2_clean)
+fit_3 <- lm(jointpain ~ treatment_disgust, data = Study2_clean)
+
+stargazer(fit_1, fit_2, fit_3, header = FALSE,
+          dep.var.labels = c("Identify Headaches", "Identify Fever", "Identify Joint Pain"),
+          covariate.labels = c("Treatment Disgust", "Constant"),
+          title = "Low Disgust Identifications as a Function of Treatment Disgust")
+
+fit_5 <- lm(rash ~ treatment_disgust, data = Study2_clean)
+fit_6 <- lm(bleeding ~ treatment_disgust, data = Study2_clean)
+
+stargazer(fit_5, fit_6, header = FALSE,
+          dep.var.labels = c("Identify Rash", "Identify Bleeding"),
+          covariate.labels = c("Treatment Disgust", "Constant"),
+          title = "High Disgust Identifications as a Function of Treatment Disgust")
+
+fit_7 <- lm(seizures ~ treatment_disgust, data = Study2_clean)
+fit_8 <- lm(breathing ~ treatment_disgust, data = Study2_clean)
+fit_9 <- lm(nausea ~ treatment_disgust, data = Study2_clean)
+
+stargazer(fit_7, fit_8, fit_9, header = FALSE,
+          dep.var.labels = c("Identify Seizures", "Identify Breathing", 
+                             "Identify Nausea"),
+          covariate.labels = c("Treatment Disgust", "Constant"),
+          title = "Fake Disgust Identifications as a Function of Treatment Disgust")
+```
+
+### Part c
+
+One argument the paper acknowledges is that those in the disgust treatment may simply be clicking through the treatment quickly to avoid the imagery and this is affecting recall. **Compare mean page_view_length for each group. Do the disgusting images cause people to spend less time viewing the page?**
+
+```{r}
+Study2_clean %>% 
+  filter(page_time < 500) %>% 
+  ggplot(aes(x = page_time, fill = treatment_disgust)) +
+  geom_density(alpha = 0.3) +
+  theme_light()
+```
+
+\newpage
+
+## Question 8
+
+### Part a 
+
+Compare your interpretations of the results of both studies to the paper's interpretation. **What is your interpretation of the findings across both studies? Do your takeaways match or differ those of the authors?**
+
+
+
+### Part b
+
+What other emotions may be of interest? **What other emotions may affect information uptake or political behavior? How so? How might you test these hypotheses?**
+
+\newpage
+
+## Question 9
+
+Run a linear regression on an outcome variable of interest (e.g. searching for more information or correctly identifying all symptoms) using any of the variables in the dataset for either Study 1 or Study 2. **Run an OLS model for any outcome variable of interest with your own specification. Carefully interpret the results. What do they tell us?**
+
+
