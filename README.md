@@ -11,3 +11,4 @@ Code, data, and figures used in my GOV 1372 Political Psychology Blog posts
 6. [Gender](https://itsyaoyu.com/blog/gov-1372-gender/)
 7. [Symbolic](https://itsyaoyu.com/blog/gov-1372-symbolic/)
 8. [Intergroup](https://itsyaoyu.com/blog/gov-1372-intergroup/)
+9. [Emotions](https://itsyaoyu.com/blog/gov-1372-emotions/)
