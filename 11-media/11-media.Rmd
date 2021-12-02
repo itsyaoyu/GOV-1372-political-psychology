@@ -66,6 +66,8 @@ misinfo.combined <- tibble(misinfo.combined) %>%
 
 ```
 
+\newpage
+
 ## Question 1
 As usual, let's take a closer look at the data. 
 
@@ -108,6 +110,8 @@ misinfo.combined %>%
 
 We can see that giving an incentive led to a greater number of 4 and 5 correct questions among respondents than the control group which did not get an incentive. It could be significant, but more tests will be needed to determine this.
 
+\newpage
+
 # Question 2
 
 ## Part a
@@ -144,6 +148,8 @@ ncol(full_data)
 
 The new merged dataset has more columns because we added in the demographics variables.
 
+\newpage
+
 # Question 3
 
 Now that we've merged in the data, let's see if some people are better at answering these factual questions than others. Choose one or more demographic variables that you think might influence correctness on the misinformation items and formulate a hypothesis about how they will be related. You can also consider whether some people will answer some types of questions more accurately than others (e.g. economic vs. social/cultural issues). Perform whatever analyses you think are appropriate to investigate your hypothesized relationship.
@@ -162,6 +168,8 @@ full_data %>%
   geom_bar(position = "dodge2") +
   theme_light()
 ```
+
+\newpage
 
 # Question 4
 
@@ -250,6 +258,8 @@ full_data %>%
 
 We can see that while there is not a major difference among all sources between strong and weak partisans, the strong Democrats much more prefer mainstream source than copartisan news source while strong Republicans much more prefer copartisan news source over all others.
 
+\newpage
+
 # Question 5
 
 Now that we've looked at the partisan divide among those who didn't receive incentives, let's take a look at the effect of incentives on the partisan information gap. **Fit the following model twice; once among those who received incentives, and once among those who did not receive incentives. Describe and discuss what the results mean for the impact of incentives on the partisan information gap.**
@@ -269,6 +279,8 @@ stargazer(fit_1)
 ```
 
 In the codebook, we can see that a pid.binary of 0 means that the respondent is Republican and 1 mean that the respondent is Democratic. And an incentive of 1 means the respondent received an incentives and 0 means they did not. Based off this, we can learn from this model that a Republican who was given an incentive on average responded 0.075 more towards the the answer congenial for Democrats than a Republican who was not given an incentive on average while holding the party ID effect at a constant. On the other hand, a Democrat respondent who was given an incentive on average responded 0.029 more towards the the answer congenial for Republicans than a Democrat who was not given an incentive on average while holding the party ID effect at a constant. This conflicting evidence further supports the authors' claim that incentives do not make respondents more likely to find the real truth. In fact, they tend to have minimal effect and only slightly respond in the other direction than expected of them on average.
+
+\newpage
 
 # Question 6: Data Science Question
 
@@ -303,6 +315,8 @@ stargazer(fit_1, coeftest(fit_1, vcov. = vcovHC(fit_1, type = 'HC1')), header = 
 ```
 
 Comparing the two models, the one with robust standard errors (right) have ever so slightly greater standard errors than the original model (left). However, there is not a huge difference between the two.
+
+\newpage
 
 # Question 7
 
